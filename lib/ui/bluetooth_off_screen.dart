@@ -1,0 +1,89 @@
+
+
+
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+
+import '../constants/styles.dart';
+import '../utils/snackbar.dart';
+
+class BluetoothOffScreen extends StatelessWidget {
+  const BluetoothOffScreen({Key? key, this.adapterState}) : super(key: key);
+
+  final BluetoothAdapterState? adapterState;
+
+  Widget buildBluetoothOffIcon(BuildContext context) {
+    return const Icon(
+      Icons.bluetooth_disabled,
+      size: 200.0,
+      color: Color(0xFFb4b4b5),
+    );
+  }
+
+  Widget buildTitle(BuildContext context) {
+    String? state = adapterState?.toString().split(".").last;
+    return Text(
+      'служба Bluetooth ${state == null ? 'not available' : state == 'off' ? 'отключена' : 'включена'}',
+      style: white14,
+    );
+  }
+
+  Widget buildTurnOnButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, right: 70, left: 70),
+      child: Container(
+        decoration: BoxDecoration(color: const Color(0xFFf68800), borderRadius: BorderRadius.circular(20)),
+        height: 40,
+        child: Center(
+          child: TextButton(
+            onPressed: () async {
+              try {
+                if (Platform.isAndroid) {
+                  await FlutterBluePlus.turnOn();
+                }
+              } catch (e) {
+                Snackbar.show(ABC.a, prettyException("Error Turning On:", e), success: false);
+              }
+            }, 
+            child: Text('включить', style: dark16),
+          )
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        // Цвет иконок статус бара на светлом фоне
+        statusBarIconBrightness: Brightness.light,
+        // Цвет иконок статус бара на темном фоне
+        // statusBarIconBrightness: Brightness.light,
+        statusBarColor: Colors.transparent
+      )
+    );
+
+    return ScaffoldMessenger(
+      key: Snackbar.snackBarKeyA,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              buildBluetoothOffIcon(context),
+              const SizedBox(height: 20,),
+              buildTitle(context),
+              if (Platform.isAndroid) buildTurnOnButton(context),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
