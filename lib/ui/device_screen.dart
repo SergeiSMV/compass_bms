@@ -12,7 +12,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 import '../constants/bms_commands.dart';
-import '../constants/loger.dart';
 import '../constants/styles.dart';
 import '../providers/bms_provider.dart';
 import '../utils/snackbar.dart';
