@@ -1,5 +1,7 @@
 
 
+// ignore_for_file: unused_field
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -10,7 +12,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 import '../constants/bms_commands.dart';
-import '../constants/loger.dart';
 import '../constants/styles.dart';
 import '../providers/bms_provider.dart';
 import '../utils/snackbar.dart';
@@ -37,7 +38,6 @@ class _DeviceScreenState extends ConsumerState<DeviceScreen> {
   late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
   late StreamSubscription<bool> _isConnectingSubscription;
   late StreamSubscription<bool> _isDisconnectingSubscription;
-  late StreamSubscription<int> _mtuSubscription;
   late StreamSubscription _charSubscription;
 
   @override

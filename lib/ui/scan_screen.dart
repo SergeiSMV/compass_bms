@@ -25,7 +25,7 @@ class ScanScreen extends StatefulWidget {
 class _ScanScreenState extends State<ScanScreen> {
 
   List<BluetoothDevice> _systemDevices = [];
-  List<ScanResult> _scanResults = [];
+  List<ScanResult> scanResults = [];
   bool _isScanning = false;
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
   late StreamSubscription<bool> _isScanningSubscription;
@@ -36,8 +36,8 @@ class _ScanScreenState extends State<ScanScreen> {
 
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       for (var r in results){
-        _scanResults.contains(r) ? null :
-        r.device.platformName.isNotEmpty && devices.contains(r.device.platformName) ? _scanResults.add(r) : null;
+        scanResults.contains(r) ? null :
+        r.device.platformName.isNotEmpty && devices.contains(r.device.platformName) ? scanResults.add(r) : null;
       }
       // _scanResults = results;
       if (mounted) {
@@ -150,7 +150,7 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   List<Widget> _buildScanResultTiles(BuildContext context) {
-    return _scanResults.map((r) {
+    return scanResults.map((r) {
       return ScanResultTile(
         result: r,
         onTap: () => onConnectPressed(r.device),
@@ -175,7 +175,7 @@ class _ScanScreenState extends State<ScanScreen> {
           decoration: BoxDecoration(
             image: DecorationImage(
               opacity: 0.5,
-              image: _scanResults.isEmpty ? const AssetImage('lib/images/cable.png') : const AssetImage('lib/images/atom.png'),
+              image: scanResults.isEmpty ? const AssetImage('lib/images/cable.png') : const AssetImage('lib/images/atom.png'),
               fit: BoxFit.cover,
             ),
           ),
@@ -192,7 +192,7 @@ class _ScanScreenState extends State<ScanScreen> {
                     ..._buildScanResultTiles(context),
                   ],
                 ),
-                _scanResults.isEmpty ? Expanded(
+                scanResults.isEmpty ? Expanded(
                   child: Center(child: Padding(
                     padding: const EdgeInsets.only(bottom: 80),
                     child: Text('нажмите поиск', style: white16,),
