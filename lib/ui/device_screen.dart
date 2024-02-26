@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 import '../constants/bms_commands.dart';
+import '../constants/loger.dart';
 import '../constants/styles.dart';
 import '../providers/bms_provider.dart';
 import '../utils/snackbar.dart';
@@ -39,6 +40,7 @@ class _DeviceScreenState extends ConsumerState<DeviceScreen> {
   late StreamSubscription<bool> _isConnectingSubscription;
   late StreamSubscription<bool> _isDisconnectingSubscription;
   late StreamSubscription _charSubscription;
+  late BluetoothCharacteristic _targetChar;
 
   @override
   void initState() {
@@ -85,9 +87,9 @@ class _DeviceScreenState extends ConsumerState<DeviceScreen> {
     _connectionStateSubscription.cancel();
     _isConnectingSubscription.cancel();
     _isDisconnectingSubscription.cancel();
+    _targetChar.setNotifyValue(false);
     _charSubscription.cancel();
     widget.device.disconnect();
-    
     super.dispose();
   }
 
@@ -118,10 +120,13 @@ class _DeviceScreenState extends ConsumerState<DeviceScreen> {
         var characteristics = service.characteristics;
         for (BluetoothCharacteristic characteristic in characteristics) {
           if (characteristic.uuid.toString() == 'ffe1') {
+            _targetChar = characteristic;
             await characteristic.write(deviceInfo, withoutResponse: false);
+            await Future.delayed(const Duration(milliseconds: 1000));
             await characteristic.setNotifyValue(true).then((_) async {
               await characteristic.write(cellInfo, withoutResponse: false);
               _charSubscription = characteristic.lastValueStream.listen((value) async {
+                
                 if(value[0] == 85){
                   if(package.isEmpty){
                     package.addAll(value);
@@ -153,7 +158,9 @@ class _DeviceScreenState extends ConsumerState<DeviceScreen> {
                   package.addAll(value);
                 }
               });
+
             });
+            
           }
         }
       }

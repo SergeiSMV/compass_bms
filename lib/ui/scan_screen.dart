@@ -39,7 +39,7 @@ class _ScanScreenState extends State<ScanScreen> {
         scanResults.contains(r) ? null :
         r.device.platformName.isNotEmpty && devices.contains(r.device.platformName) ? scanResults.add(r) : null;
       }
-      // _scanResults = results;
+      // scanResults = results;
       if (mounted) {
         setState(() {});
       }
