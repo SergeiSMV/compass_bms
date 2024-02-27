@@ -39,7 +39,7 @@ class _ScanScreenState extends State<ScanScreen> {
         scanResults.contains(r) ? null :
         r.device.platformName.isNotEmpty && devices.contains(r.device.platformName) ? scanResults.add(r) : null;
       }
-      // scanResults = results;
+      scanResults = results;
       if (mounted) {
         setState(() {});
       }
@@ -179,29 +179,29 @@ class _ScanScreenState extends State<ScanScreen> {
               fit: BoxFit.cover,
             ),
           ),
-          child: RefreshIndicator(
-            onRefresh: onRefresh,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 10,),
-                ListView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10,),
+              Flexible(
+                child: ListView(
+                  controller: ScrollController(),
                   shrinkWrap: true,
                   children: <Widget>[
                     ..._buildSystemDeviceTiles(context),
                     ..._buildScanResultTiles(context),
                   ],
                 ),
-                scanResults.isEmpty ? Expanded(
-                  child: Center(child: Padding(
-                    padding: const EdgeInsets.only(bottom: 80),
-                    child: Text('нажмите поиск', style: white16,),
-                  ))) 
-                  : const Expanded(child: SizedBox(height: 5,)),
-                buildScanButton(context),
-                const SizedBox(height: 10)
-              ],
-            ),
+              ),
+              scanResults.isEmpty ? Expanded(
+                child: Center(child: Padding(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  child: Text('нажмите поиск', style: white16,),
+                ))) 
+                : const SizedBox(height: 5,),
+              buildScanButton(context),
+              const SizedBox(height: 10)
+            ],
           ),
         ),
         
