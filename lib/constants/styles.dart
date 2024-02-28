@@ -24,3 +24,13 @@ TextStyle white16 = GoogleFonts.openSans(color: Colors.white, fontSize: 16);
 TextStyle white18 = GoogleFonts.openSans(color: Colors.white, fontSize: 18);
 TextStyle white20 = GoogleFonts.openSans(color: Colors.white, fontSize: 20);
 TextStyle white22 = GoogleFonts.openSans(color: Colors.white, fontSize: 22);
+
+TextStyle grey10 = GoogleFonts.openSans(color: Colors.grey, fontSize: 10);
+TextStyle grey12 = GoogleFonts.openSans(color: Colors.grey, fontSize: 12);
+TextStyle grey13 = GoogleFonts.openSans(color: Colors.grey, fontSize: 13);
+TextStyle grey14 = GoogleFonts.openSans(color: Colors.grey, fontSize: 14);
+TextStyle grey15 = GoogleFonts.openSans(color: Colors.grey, fontSize: 15);
+TextStyle grey16 = GoogleFonts.openSans(color: Colors.grey, fontSize: 16);
+TextStyle grey18 = GoogleFonts.openSans(color: Colors.grey, fontSize: 18);
+TextStyle grey20 = GoogleFonts.openSans(color: Colors.grey, fontSize: 20);
+TextStyle grey22 = GoogleFonts.openSans(color: Colors.grey, fontSize: 22);

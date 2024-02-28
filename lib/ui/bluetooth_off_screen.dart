@@ -1,6 +1,3 @@
-
-
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -34,7 +31,27 @@ class BluetoothOffScreen extends StatelessWidget {
   Widget buildTurnOnButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 20, right: 70, left: 70),
-      child: Container(
+      child: ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) => const Color(0xFFf68800)),
+        ),
+        onPressed: () async {
+          try {
+            if (Platform.isAndroid) {
+              await FlutterBluePlus.turnOn();
+            }
+          } catch (e) {
+            Snackbar.show(ABC.a, prettyException("ошибка при попытке включить службы:", e), success: false);
+          }
+        }, 
+        child: Padding(
+          padding: const EdgeInsets.only(left: 45, right: 45, bottom: 3),
+          child: Text('включить', style: dark16),
+        )
+      )
+      
+      /*
+      Container(
         decoration: BoxDecoration(color: const Color(0xFFf68800), borderRadius: BorderRadius.circular(20)),
         height: 40,
         child: Center(
@@ -52,6 +69,7 @@ class BluetoothOffScreen extends StatelessWidget {
           )
         ),
       ),
+      */
     );
   }
 

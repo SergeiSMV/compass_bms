@@ -27,8 +27,8 @@ class Snackbar {
 
   static show(ABC abc, String msg, {required bool success}) {
     final snackBar = success
-        ? SnackBar(content: Text(msg, style: white12,), backgroundColor: Colors.blue)
-        : SnackBar(content: Text(msg, style: white12,), backgroundColor: Colors.red);
+        ? SnackBar(content: Text(msg, style: white14,), backgroundColor: Colors.blue)
+        : SnackBar(content: Text(msg, style: white14,), backgroundColor: Colors.red);
     getSnackbar(abc).currentState?.removeCurrentSnackBar();
     getSnackbar(abc).currentState?.showSnackBar(snackBar);
   }

@@ -1,15 +1,11 @@
-
-
-
-
 import 'dart:async';
 
 import 'package:compass/utils/extra.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-import '../constants/devices.dart';
 import '../constants/styles.dart';
+import '../data/bluetooth_device_implements.dart';
 import '../utils/snackbar.dart';
 import 'device_screen.dart';
 import 'scan_result_tile.dart';
@@ -24,6 +20,8 @@ class ScanScreen extends StatefulWidget {
 
 class _ScanScreenState extends State<ScanScreen> {
 
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
   List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> scanResults = [];
   bool _isScanning = false;
@@ -33,12 +31,8 @@ class _ScanScreenState extends State<ScanScreen> {
   @override
   void initState() {
     super.initState();
-
-    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
-      for (var r in results){
-        scanResults.contains(r) ? null :
-        r.device.platformName.isNotEmpty && devices.contains(r.device.platformName) ? scanResults.add(r) : null;
-      }
+    
+    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) async {
       scanResults = results;
       if (mounted) {
         setState(() {});
@@ -46,6 +40,7 @@ class _ScanScreenState extends State<ScanScreen> {
     }, onError: (e) {
       Snackbar.show(ABC.b, prettyException("ошибка сканирования:", e), success: false);
     });
+    
 
     _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
       _isScanning = state;
@@ -87,12 +82,23 @@ class _ScanScreenState extends State<ScanScreen> {
     }
   }
 
-  void onConnectPressed(BluetoothDevice device) {
-    device.connectAndUpdateStream().catchError((e) {
+  void onConnectPressed(BluetoothDevice device) async {
+    MaterialPageRoute route;
+    await device.connectAndUpdateStream().catchError((e) {
       Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
+    }).then((_) async {
+      device.isConnected ?
+      await BluetoothDeviceImplements().controlDeviceSevice(device).then((controlDeviceSevice) {
+        controlDeviceSevice ? {
+          route = MaterialPageRoute(builder: (context) => DeviceScreen(device: device), settings: const RouteSettings(name: '/DeviceScreen')),
+          Navigator.of(context).push(route)
+        } : { 
+          Snackbar.show(ABC.b, '\nУстройство не поддерживается\n', success: false),
+          device.disconnect() 
+        };
+      }) : null;
     });
-    MaterialPageRoute route = MaterialPageRoute(builder: (context) => DeviceScreen(device: device), settings: const RouteSettings(name: '/DeviceScreen'));
-    Navigator.of(context).push(route);
+    
   }
 
   Future onRefresh() {
@@ -183,8 +189,9 @@ class _ScanScreenState extends State<ScanScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 10,),
-              Flexible(
+              scanResults.isEmpty ? const SizedBox.shrink() : Expanded(
                 child: ListView(
+                  physics: const BouncingScrollPhysics(),
                   controller: ScrollController(),
                   shrinkWrap: true,
                   children: <Widget>[

@@ -76,7 +76,10 @@ class _ScanResultTileState extends State<ScanResultTile> {
         ],
       );
     } else {
-      return Text(widget.result.device.remoteId.str);
+      return Text(
+        widget.result.device.remoteId.str, 
+        style: widget.result.advertisementData.connectable ? white16 : grey14,
+      );
     }
   }
 
@@ -87,7 +90,10 @@ class _ScanResultTileState extends State<ScanResultTile> {
         foregroundColor: Colors.white,
       ),
       onPressed: (widget.result.advertisementData.connectable) ? widget.onTap : null,
-      child: isConnected ? Text('открыть', style: dark14,) : Text('соединение', style: dark14,),
+      child: isConnected ? Text('открыть', style: dark14,) : 
+      Text(widget.result.advertisementData.connectable ? 'соединение' : 'закрыт', 
+        style: widget.result.advertisementData.connectable ? dark14 : grey14,
+      ),
     );
   }
 
