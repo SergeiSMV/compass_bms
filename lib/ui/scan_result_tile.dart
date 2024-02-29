@@ -23,7 +23,6 @@ class _ScanResultTileState extends State<ScanResultTile> {
   @override
   void initState() {
     super.initState();
-
     _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
       _connectionState = state;
       if (mounted) {
@@ -64,15 +63,8 @@ class _ScanResultTileState extends State<ScanResultTile> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            widget.result.device.platformName,
-            overflow: TextOverflow.ellipsis,
-            style: white16,
-          ),
-          Text(
-            widget.result.device.remoteId.str,
-            style: white12,
-          )
+          Text(widget.result.device.platformName, overflow: TextOverflow.ellipsis, style: white16,),
+          Text('MAC: ${widget.result.device.remoteId.str}', style: white12,)
         ],
       );
     } else {
@@ -86,48 +78,44 @@ class _ScanResultTileState extends State<ScanResultTile> {
   Widget _buildConnectButton(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFf68800),
+        backgroundColor: isConnected ? Colors.red : Colors.orange,
         foregroundColor: Colors.white,
       ),
       onPressed: (widget.result.advertisementData.connectable) ? widget.onTap : null,
-      child: isConnected ? Text('открыть', style: dark14,) : 
+      child: isConnected ? Text('отключить', style: white14,) :
       Text(widget.result.advertisementData.connectable ? 'соединение' : 'закрыт', 
         style: widget.result.advertisementData.connectable ? dark14 : grey14,
       ),
     );
   }
 
-  /*
+  
   Widget _buildAdvRow(BuildContext context, String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(title, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(
-            width: 12.0,
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodySmall?.apply(color: Colors.black),
-              softWrap: true,
-            ),
-          ),
-        ],
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(title, style: white12),
+        const SizedBox(width: 5),
+        Expanded(child: Text(value, style: white12, softWrap: true,),),
+      ],
     );
   }
-  */
+  
 
   @override
   Widget build(BuildContext context) {
-    // var adv = widget.result.advertisementData;
+    var adv = widget.result.advertisementData;
     return Column(
       children: [
         ListTile(
-          title: _buildTitle(context),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTitle(context),
+              if (adv.serviceUuids.isNotEmpty) _buildAdvRow(context, 'Service UUIDs:', getNiceServiceUuids(adv.serviceUuids)),
+            ],
+          ),
           trailing: _buildConnectButton(context),
         ),
         const Padding(

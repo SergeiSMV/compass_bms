@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:compass/ui/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'ui/bluetooth_off_screen.dart';
-import 'ui/scan_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,7 +50,7 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     Widget screen = _adapterState == BluetoothAdapterState.on
-        ? const ScanScreen()
+        ? const MainScreen()
         : BluetoothOffScreen(adapterState: _adapterState);
 
 
@@ -58,7 +58,7 @@ class _AppState extends State<App> {
       debugShowCheckedModeBanner: false,
       color: Colors.lightBlue,
       home: screen,
-      navigatorObservers: [BluetoothAdapterStateObserver()],
+      // navigatorObservers: [BluetoothAdapterStateObserver()],
     );
   }
 }
