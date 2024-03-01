@@ -41,6 +41,7 @@ dependencies:
   logger: ^2.0.2+1
   material_design_icons_flutter: ^7.0.7296
   google_nav_bar: ^5.0.6
+  flutter_progress_hud: ^2.0.2
 
 dev_dependencies:
   flutter_test:

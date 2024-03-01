@@ -1,14 +1,15 @@
-
-
 import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:compass/utils/extra.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../constants/loger.dart';
 import '../domain/ffe0_controller_repository.dart';
 import '../providers/bms_provider.dart';
+import '../ui/monitoring_device_screen.dart';
 
 class FFE0Implements extends FFE0Repository{
 
@@ -16,49 +17,40 @@ class FFE0Implements extends FFE0Repository{
   static Guid targetChar = Guid('ffe1');
   static List<int> deviceInfo = [170, 85, 144, 235, 151, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17];
   static List<int> cellInfo = [170, 85, 144, 235, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16];
-  
+  late StreamController<Map<String, dynamic>> streamController;
+  late StreamSubscription<dynamic>? charSubscription;
+  late BluetoothCharacteristic? notifyChar;
+  List<int> package = [];
+
   @override
-  Future<StreamSubscription?> connect(ScanResult r, WidgetRef ref) async {
-    await r.device.connectAndUpdateStream();
-    StreamSubscription<dynamic>? charSubscription;
-    String mac = r.device.remoteId.str;
-    List<int> package = [];
-    List<BluetoothService> services = await r.device.discoverServices();
-    try {
+  Future<void> connect(ScanResult r) async {
+    await r.device.connectAndUpdateStream().then((_) async {
+      List<BluetoothService> services = await r.device.discoverServices();
       var service = services.firstWhere((s) => s.uuid == targetService);
       var char = service.characteristics.firstWhere((c) => c.uuid == targetChar);
       await char.write(deviceInfo, withoutResponse: false);
       await Future.delayed(const Duration(milliseconds: 1000));
-      await char.setNotifyValue(true).then((_) async {
-        await char.write(cellInfo, withoutResponse: false);
-        charSubscription = char.lastValueStream.listen((value) async {
+      await char.write(cellInfo, withoutResponse: false);
+    });
+  }
 
+  
+  @override
+  Future<Stream<Map<String, dynamic>>> streamData(ScanResult r) async {
+    streamController = StreamController<Map<String, dynamic>>.broadcast();
+    List<BluetoothService> services = await r.device.discoverServices();
+
+    try {
+      var service = services.firstWhere((s) => s.uuid == targetService);
+      var notifyChar = service.characteristics.firstWhere((c) => c.uuid == targetChar);
+      await notifyChar.setNotifyValue(true).then((_) async {
+        charSubscription = notifyChar.lastValueStream.listen((value) async {
           if (value[0] == 85){
             if(package.isEmpty){
               package.addAll(value);
             } else {
-              Map currentMonitoring = ref.read(monitoringProvider);
-              Uint8List input = Uint8List.fromList(package);
-              ByteData bd = input.buffer.asByteData();
-              try {
-                Map data = {};
-                for (int i = 0; i < 32; i++){
-                  int result = bd.getInt16(6 + 2 * i, Endian.little);
-                  result > 0 ? data['cell ${i + 1}'] = '${result / 1000} V' : null;
-                }
-
-                int temp1 = bd.getInt16(162, Endian.little);
-                temp1 > 0 ? data['temp1'] = '${temp1 / 10} °C' : null;
-
-                int temp2 = bd.getInt16(164, Endian.little);
-                temp2 > 0 ? data['temp2'] = '${temp2 / 10} °C' : null;
-
-                currentMonitoring[mac]['provider'] = Map.from(data);
-                ref.read(monitoringProvider.notifier).state = currentMonitoring;
-
-              } catch (e) {
-                null;
-              }
+              Map<String, dynamic> data = decodePackage(package);
+              streamController.add(data);
               package.clear();
               package.addAll(value);
             }
@@ -67,10 +59,47 @@ class FFE0Implements extends FFE0Repository{
           }
         });
       });
-      return charSubscription;
     } catch (e) {
-      return null;
+      streamController.close();
+      null;
     }
+    return streamController.stream;
   }
 
+  @override
+  Map<String, dynamic> decodePackage(List<int> package) {
+    Map<String, dynamic> data = {};
+    Uint8List input = Uint8List.fromList(package);
+    ByteData bd = input.buffer.asByteData();
+    try {
+      for (int i = 0; i < 32; i++){
+        int result = bd.getInt16(6 + 2 * i, Endian.little);
+        result > 0 ? data['cell ${i + 1}'] = '${result / 1000} V' : null;
+      }
+      int voltage = bd.getInt32(150, Endian.little);
+      data['voltage'] = '${voltage / 1000} V';
+      int power = bd.getInt32(154, Endian.little);
+      data['power'] = '${power / 1000} W';
+      int current = bd.getInt32(158, Endian.little);
+      data['current'] = '${current / 1000} A';
+      int remain = bd.getInt8(173);
+      data['remain'] = '$remain%';
+      int temp1 = bd.getInt16(162, Endian.little);
+      temp1 > 0 ? data['temp 1'] = '${temp1 / 10} °C' : null;
+      int temp2 = bd.getInt16(164, Endian.little);
+      temp2 > 0 ? data['temp 2'] = '${temp2 / 10} °C' : null;
+
+      streamController.add(data);
+    } catch (e) {
+      null;
+    }
+    return data;
+  }
+  
+  @override
+  void disconnect() {
+    notifyChar?.setNotifyValue(false);
+    charSubscription?.cancel();
+  }
+  
 }

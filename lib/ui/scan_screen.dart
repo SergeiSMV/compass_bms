@@ -14,7 +14,8 @@ import 'monitoring_device_screen.dart';
 import 'scan_result_tile.dart';
 
 class ScanScreen extends ConsumerStatefulWidget {
-  const ScanScreen({super.key});
+  final progress;
+  const ScanScreen({super.key, required this.progress});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _ScanScreenState();
@@ -49,6 +50,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
 
   @override
   void dispose() {
+    log.d('ScanScreen dispose');
     _scanResultsSubscription.cancel();
     _isScanningSubscription.cancel();
     super.dispose();
@@ -74,40 +76,31 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   }
 
   void onConnectPressed(ScanResult r) async {
-    
-    // final BluetoothDevice device = r.device;
-
     var adv = r.advertisementData;
-    
     List<Guid> services = adv.serviceUuids;
     for (var s in services){
       if (requiredServices.contains(s)){
-        String mac = r.device.remoteId.str;
-        Map currentMonitoring = ref.read(monitoringProvider);
-        currentMonitoring[mac] = {
-          'widget': '',
-          // 'provider': StateProvider((ref) => {})
-          'provider': {}
-        };
-        ref.read(monitoringProvider.notifier).state = currentMonitoring;
-        Map updateMonitoring = ref.read(monitoringProvider);
-        StreamSubscription<dynamic>? charSubscription = await FFE0Implements().connect(r, ref);
-        updateMonitoring[mac]['widget'] = MonitoringDeviceScreen(r: r, charSubscription: charSubscription,);
-        ref.read(monitoringProvider.notifier).state = updateMonitoring;
+        if (s.toString() == 'ffe0'){
+          widget.progress.show();
+          await FFE0Implements().connect(r);
+          String mac = r.device.remoteId.str;
+          Map<String, Widget> currentWidgets = ref.read(monitoringWidgets);
+          currentWidgets[mac] = MonitoringDeviceScreen(r: r);
+          ref.read(monitoringWidgets.notifier).state = currentWidgets;
+          widget.progress.dismiss();
+        } else {
+          null;
+        }
         break;
       }
     }
-    Map currentMonitor = ref.read(monitoringProvider);
-    log.d('currentMonitor $currentMonitor');
-
-    /*
-    device.connectAndUpdateStream().catchError((e) {
-      Snackbar.show(ABC.b, prettyException("ошибка при попытке подключения:", e), success: false);
-    });
-    */
   }
 
   void onDisconnectPressed(BluetoothDevice device) async {
+    String mac = device.remoteId.str;
+    Map<String, Widget> currentWidgets = ref.read(monitoringWidgets);
+    currentWidgets.remove(mac);
+    ref.read(monitoringWidgets.notifier).state = currentWidgets;
     await device.disconnect();
   }
 
@@ -154,6 +147,42 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
       key: Snackbar.snackBarKeyB,
+      child: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            opacity: 0.7,
+            image: AssetImage('lib/images/atom.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 10,),
+            scanResults.isEmpty ? const SizedBox.shrink() : Expanded(
+              child: ListView(
+                physics: const BouncingScrollPhysics(),
+                controller: ScrollController(),
+                shrinkWrap: true,
+                children: <Widget>[
+                  ..._buildScanResultTiles(context),
+                ],
+              ),
+            ),
+            scanResults.isEmpty ? Expanded(
+              child: Center(child: Padding(
+                padding: const EdgeInsets.only(bottom: 80),
+                child: Text('нажмите поиск', style: white16,),
+              ))) 
+              : const SizedBox(height: 5,),
+            buildScanButton(context),
+            const SizedBox(height: 10)
+          ],
+        ),
+      ),
+      /*
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Container(
@@ -193,6 +222,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         ),
         // bottomNavigationBar: bottomNavBar(),
       ),
+      */
     );
   }
 }
