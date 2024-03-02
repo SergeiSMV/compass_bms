@@ -139,7 +139,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
       child: GridView.builder(
         shrinkWrap: true,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3, // Количество колонок
+          crossAxisCount: 2, // Количество колонок
           childAspectRatio: 3, // Отношение ширины к высоте каждого элемента
           crossAxisSpacing: 5, // Пространство между колонками
           mainAxisSpacing: 5, // Пространство между рядами

@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:compass/utils/extra.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import '../constants/loger.dart';
 import '../domain/ffe0_controller_repository.dart';
 
 class FFF0Implements extends FFE0Repository{
@@ -32,22 +33,35 @@ class FFF0Implements extends FFE0Repository{
   Future<void> connect(ScanResult r) async {
 
     List<int> soc = [165, 8, 144, 8, 0, 0, 0, 0, 0, 0, 0, 0, 69];
-    List<int> cellVoltage = [165, 8, 149, 8, 0, 0, 0, 0, 0, 0, 0, 0, 74];
+    List<int> cellVoltage = [0xA5, 0x80, 0x95, 8, 0, 0, 0, 0, 0, 0, 0, 0];
 
     await r.device.connectAndUpdateStream().then((_) async {
+
+      int calculatedCrc = cellVoltage.sublist(0, cellVoltage.length).reduce((sum, current) => sum + current) & 0xFF;
+      cellVoltage.add(calculatedCrc);
+
       
       List<BluetoothService> services = await r.device.discoverServices();
+      log.d(services);
 
       var service = services.firstWhere((s) => s.uuid == targetService);
+      // 43
+      var tmpService = services.firstWhere((s) => s.uuid == Guid('f000ffc0-0451-4000-b000-000000000000'));
       var readChar = service.characteristics.firstWhere((c) => c.uuid == Guid('fff1'));
       var writeChar = service.characteristics.firstWhere((c) => c.uuid == Guid('fff2'));
+      var tmpChar = tmpService.characteristics.firstWhere((c) => c.uuid == Guid('f000ffc1-0451-4000-b000-000000000000'));
 
-      // await writeChar.write(cellVoltage, withoutResponse: true);
+      await tmpChar.write([], withoutResponse: true);
       // List<int> result = await readChar.read();
-      // log.d(result.length);
-      // await Future.delayed(const Duration(seconds: 5));
-      // List<int> newResult = await readChar.read();
-      // log.d(newResult.length);
+      // log.d(result);
+
+      Future.delayed(const Duration(seconds: 1));
+      await readChar.setNotifyValue(true).then((_) async {
+        await writeChar.write(cellVoltage, withoutResponse: true);
+        readChar.lastValueStream.listen((value) async {
+          log.d('value: $value');
+        });
+      });
     });
   }
 
