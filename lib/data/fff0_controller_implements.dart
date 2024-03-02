@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -6,10 +8,11 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../domain/ffe0_controller_repository.dart';
 
-class FFE0Implements extends FFE0Repository{
+class FFF0Implements extends FFE0Repository{
 
-  static Guid targetService = Guid('ffe0');
-  static Guid targetChar = Guid('ffe1');
+  static Guid targetService = Guid('fff0');
+  static Guid targetChar = Guid('fff1');
+
   static List<int> deviceInfo = [170, 85, 144, 235, 151, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17];
   static List<int> cellInfo = [170, 85, 144, 235, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16];
   StreamController<Map<String, dynamic>>? streamController;
@@ -17,15 +20,34 @@ class FFE0Implements extends FFE0Repository{
   BluetoothCharacteristic? notifyChar;
   List<int> package = [];
 
+  // 0x90 -> [165, 8, 144, 8, 0, 0, 0, 0, 0, 0, 0, 0, 69]
+  // 0x95 -> [165, 8, 149, 8, 0, 0, 0, 0, 0, 0, 0, 0, 74]
+
+  /*
+  fff2 - broadcast: false, read: false, writeWithoutResponse: true, write: false, notify: false,
+  fff1 - broadcast: false, read: true, writeWithoutResponse: false, write: false, notify: true
+  */
+
   @override
   Future<void> connect(ScanResult r) async {
+
+    List<int> soc = [165, 8, 144, 8, 0, 0, 0, 0, 0, 0, 0, 0, 69];
+    List<int> cellVoltage = [165, 8, 149, 8, 0, 0, 0, 0, 0, 0, 0, 0, 74];
+
     await r.device.connectAndUpdateStream().then((_) async {
+      
       List<BluetoothService> services = await r.device.discoverServices();
+
       var service = services.firstWhere((s) => s.uuid == targetService);
-      var char = service.characteristics.firstWhere((c) => c.uuid == targetChar);
-      await char.write(deviceInfo, withoutResponse: false);
-      await Future.delayed(const Duration(milliseconds: 1000));
-      await char.write(cellInfo, withoutResponse: false);
+      var readChar = service.characteristics.firstWhere((c) => c.uuid == Guid('fff1'));
+      var writeChar = service.characteristics.firstWhere((c) => c.uuid == Guid('fff2'));
+
+      // await writeChar.write(cellVoltage, withoutResponse: true);
+      // List<int> result = await readChar.read();
+      // log.d(result.length);
+      // await Future.delayed(const Duration(seconds: 5));
+      // List<int> newResult = await readChar.read();
+      // log.d(newResult.length);
     });
   }
 
@@ -44,16 +66,8 @@ class FFE0Implements extends FFE0Repository{
             if(package.isEmpty){
               package.addAll(value);
             } else {
-              // Рассчитываем контрольную сумму для всех элементов списка, кроме последнего
-              int calculatedCrc = package.sublist(0, package.length - 1).reduce((sum, current) => sum + current) & 0xFF;
-              // Получаем контрольную сумму из последнего элемента списка
-              int providedCrc = package.last;
-              // Сравниваем рассчитанную контрольную сумму с предоставленной
-              bool isCrcValid = calculatedCrc == providedCrc;
-              if(isCrcValid){
-                Map<String, dynamic> data = decodePackage(package);
-                streamController!.add(data);
-              } 
+              Map<String, dynamic> data = decodePackage(package);
+              streamController!.add(data);
               package.clear();
               package.addAll(value);
             }
@@ -91,6 +105,7 @@ class FFE0Implements extends FFE0Repository{
       temp1 > 0 ? data['temp 1'] = '${temp1 / 10} °C' : null;
       int temp2 = bd.getInt16(164, Endian.little);
       temp2 > 0 ? data['temp 2'] = '${temp2 / 10} °C' : null;
+
     } catch (e) {
       null;
     }

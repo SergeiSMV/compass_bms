@@ -18,7 +18,7 @@ class MainScreen extends ConsumerStatefulWidget {
 
 class _MainScreenState extends ConsumerState<MainScreen> {
 
-  final List<String> appBarTitles = const['BMS устройства', 'Мониторинг'];
+  final List<String> appBarTitles = const['BMS устройства', 'мониторинг'];
 
   Widget bottomNavBar(){
     return GNav(

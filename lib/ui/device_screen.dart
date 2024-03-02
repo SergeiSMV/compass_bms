@@ -249,7 +249,6 @@ class _DeviceScreenState extends ConsumerState<DeviceScreen> {
                                       children: [
                                         Icon(MdiIcons.battery, color: Colors.grey.shade800, size: 30,),
                                         Text('${index + 1}', style: white10,)
-                                        // CircleAvatar(radius: 11, backgroundColor: const Color(0xFFf68800), child: Text('${index + 1}', style: dark10,),),
                                       ],
                                     ),
                                     

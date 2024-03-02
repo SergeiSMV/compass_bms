@@ -5,15 +5,16 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/bms_services.dart';
-import '../constants/loger.dart';
 import '../constants/styles.dart';
 import '../data/ffe0_controller_implements.dart';
+import '../data/fff0_controller_implements.dart';
 import '../providers/bms_provider.dart';
 import '../utils/snackbar.dart';
 import 'monitoring_device_screen.dart';
 import 'scan_result_tile.dart';
 
 class ScanScreen extends ConsumerStatefulWidget {
+  // ignore: prefer_typing_uninitialized_variables
   final progress;
   const ScanScreen({super.key, required this.progress});
 
@@ -50,7 +51,6 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
 
   @override
   void dispose() {
-    log.d('ScanScreen dispose');
     _scanResultsSubscription.cancel();
     _isScanningSubscription.cancel();
     super.dispose();
@@ -88,8 +88,12 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           currentWidgets[mac] = MonitoringDeviceScreen(r: r);
           ref.read(monitoringWidgets.notifier).state = currentWidgets;
           widget.progress.dismiss();
-        } else {
-          null;
+        } 
+        
+        if (s.toString() == 'fff0') {
+          // widget.progress.show();
+          await FFF0Implements().connect(r);
+          // widget.progress.dismiss();
         }
         break;
       }

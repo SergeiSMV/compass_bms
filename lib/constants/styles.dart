@@ -34,3 +34,23 @@ TextStyle grey16 = GoogleFonts.openSans(color: Colors.grey, fontSize: 16);
 TextStyle grey18 = GoogleFonts.openSans(color: Colors.grey, fontSize: 18);
 TextStyle grey20 = GoogleFonts.openSans(color: Colors.grey, fontSize: 20);
 TextStyle grey22 = GoogleFonts.openSans(color: Colors.grey, fontSize: 22);
+
+TextStyle green10 = GoogleFonts.openSans(color: Colors.green, fontSize: 10);
+TextStyle green12 = GoogleFonts.openSans(color: Colors.green, fontSize: 12);
+TextStyle green13 = GoogleFonts.openSans(color: Colors.green, fontSize: 13);
+TextStyle green14 = GoogleFonts.openSans(color: Colors.green, fontSize: 14);
+TextStyle green15 = GoogleFonts.openSans(color: Colors.green, fontSize: 15);
+TextStyle green16 = GoogleFonts.openSans(color: Colors.green, fontSize: 16);
+TextStyle green18 = GoogleFonts.openSans(color: Colors.green, fontSize: 18);
+TextStyle green20 = GoogleFonts.openSans(color: Colors.green, fontSize: 20);
+TextStyle green22 = GoogleFonts.openSans(color: Colors.green, fontSize: 22);
+
+TextStyle red10 = GoogleFonts.openSans(color: Colors.red, fontSize: 10);
+TextStyle red12 = GoogleFonts.openSans(color: Colors.red, fontSize: 12);
+TextStyle red13 = GoogleFonts.openSans(color: Colors.red, fontSize: 13);
+TextStyle red14 = GoogleFonts.openSans(color: Colors.red, fontSize: 14);
+TextStyle red15 = GoogleFonts.openSans(color: Colors.red, fontSize: 15);
+TextStyle red16 = GoogleFonts.openSans(color: Colors.red, fontSize: 16);
+TextStyle red18 = GoogleFonts.openSans(color: Colors.red, fontSize: 18);
+TextStyle red20 = GoogleFonts.openSans(color: Colors.red, fontSize: 20);
+TextStyle red22 = GoogleFonts.openSans(color: Colors.red, fontSize: 22);
