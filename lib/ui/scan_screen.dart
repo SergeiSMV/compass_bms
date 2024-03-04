@@ -89,11 +89,14 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           ref.read(monitoringWidgets.notifier).state = currentWidgets;
           widget.progress.dismiss();
         } 
-        
         if (s.toString() == 'fff0') {
-          // widget.progress.show();
+          widget.progress.show();
           await FFF0Implements().connect(r);
-          // widget.progress.dismiss();
+          String mac = r.device.remoteId.str;
+          Map<String, Widget> currentWidgets = ref.read(monitoringWidgets);
+          currentWidgets[mac] = MonitoringDeviceScreen(r: r);
+          ref.read(monitoringWidgets.notifier).state = currentWidgets;
+          widget.progress.dismiss();
         }
         break;
       }

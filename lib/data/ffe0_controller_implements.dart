@@ -88,9 +88,9 @@ class FFE0Implements extends FFE0Repository{
       int remain = bd.getInt8(173);
       data['remain'] = remain;
       int temp1 = bd.getInt16(162, Endian.little);
-      temp1 > 0 ? data['temp 1'] = '${temp1 / 10} °C' : null;
+      temp1 > 0 ? data['temp 1'] = '${temp1 ~/ 10} °C' : null;
       int temp2 = bd.getInt16(164, Endian.little);
-      temp2 > 0 ? data['temp 2'] = '${temp2 / 10} °C' : null;
+      temp2 > 0 ? data['temp 2'] = '${temp2 ~/ 10} °C' : null;
     } catch (e) {
       null;
     }

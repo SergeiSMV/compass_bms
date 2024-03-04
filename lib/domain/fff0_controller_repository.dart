@@ -8,7 +8,15 @@ abstract class FFF0Repository {
 
   Future<Stream<Map<String, dynamic>>> streamData(ScanResult r);
 
-  Map<String, dynamic> decodePackage(List<int> package);
+  void decodePackage(List<int> package);
+
+  void decodeCellVoltage(List<int> package);
+
+  void decodeTemperature(List<int> package);
+
+  void decodeSOC(List<int> package);
+
+  int calculatedCrc(List<int> requestData);
   
   void disconnect();
 

@@ -137,6 +137,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8),
       child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2, // Количество колонок
@@ -162,7 +163,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                 ],
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Stack(

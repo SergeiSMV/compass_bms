@@ -45,7 +45,10 @@ class _MonitoringScreenState extends ConsumerState<MonitoringScreen> {
               itemCount: data.length,
               itemBuilder: (context, index){
                 String mac = keys[index];
-                return data[mac];
+                return Padding(
+                  padding: const EdgeInsets.only(left: 3, right: 3, top: 4, bottom: 4),
+                  child: data[mac],
+                );
               }
             ),
           );
