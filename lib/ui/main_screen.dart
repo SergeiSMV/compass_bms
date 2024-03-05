@@ -18,12 +18,10 @@ class MainScreen extends ConsumerStatefulWidget {
 
 class _MainScreenState extends ConsumerState<MainScreen> {
 
-  final List<String> appBarTitles = const['BMS устройства', 'мониторинг'];
-
   Widget bottomNavBar(){
     return GNav(
       textStyle: dark14,
-      tabMargin: const EdgeInsets.only(left: 12, right: 12, bottom: 8),
+      tabMargin: const EdgeInsets.only(left: 20, right: 20, bottom: 8),
       gap: 8,
       activeColor: Colors.black,
       iconSize: 25,
@@ -59,16 +57,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           final progress = ProgressHUD.of(context);
           return Scaffold(
             backgroundColor: Colors.black,
-            appBar: AppBar(
-              backgroundColor: const Color(0xFFf68800),
-              centerTitle: true,
-              title: Consumer(
-                builder: (context, ref, child) {
-                  final selectedIndex = ref.watch(screenIndexProvider);
-                  return Text(appBarTitles[selectedIndex], style: dark18,);
-                }
-              ),
-            ),
             body: Consumer(
               builder: (context, ref, child) {
                 final List<Widget> screens = [ScanScreen(progress: progress), const MonitoringScreen()];

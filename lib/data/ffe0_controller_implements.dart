@@ -77,7 +77,7 @@ class FFE0Implements extends FFE0Repository{
     try {
       for (int i = 0; i < 32; i++){
         int result = bd.getInt16(6 + 2 * i, Endian.little);
-        result > 0 ? data['cell ${i + 1}'] = '${result / 1000} V' : null;
+        result > 0 ? data['cell ${i + 1}'] = result / 1000 : null;
       }
       int voltage = bd.getInt32(150, Endian.little);
       data['voltage'] = voltage / 1000;

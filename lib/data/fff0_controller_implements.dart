@@ -1,5 +1,3 @@
-// ignore_for_file: unused_local_variable
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -25,8 +23,6 @@ class FFF0Implements extends FFF0Repository{
   StreamController<Map<String, dynamic>>? streamController;
   Map<String, dynamic> data = {};
 
-
-
   @override
   Future<void> connect(ScanResult r) async {
     await r.device.connectAndUpdateStream().then((_) async {
@@ -39,7 +35,6 @@ class FFF0Implements extends FFF0Repository{
     });
   }
 
-  
   @override
   Future<Stream<Map<String, dynamic>>> streamData(ScanResult r) async {
 
@@ -125,71 +120,36 @@ class FFF0Implements extends FFF0Repository{
   void decodeCellVoltage(List<int> package) {
 
     List<int> cellValues = [];
+    List<List<int>> chunks = [];
+    int chunkSize = 13;
+    for (int i = 0; i < package.length; i += chunkSize) {
+      int end = (i + chunkSize < package.length) ? i + chunkSize : package.length;
+      List<int> chunk = package.sublist(i, end);
+      chunks.add(chunk);
+    }
 
-    for (int i = 0; i < package.length; i++) {
-      if (package[i] == 165 && i + 4 < package.length) { // Начало фрейма найдено
-        int frameStart = i + 4; // Пропускаем служебные байты и номер фрейма
-        // Чтение напряжений ячеек во фрейме
-        for (int j = frameStart; j < frameStart + 6 && j < package.length - 1; j += 2) {
-          // Считываем 2 байта с учетом Little Endian и добавляем в список
-          int cellVoltage = package[j] + (package[j + 1] << 8);
-          cellValues.add(cellVoltage);
+    for (var chunk in chunks){
+      if (chunk[0] == 165 && chunk[4] != 0){
+        Uint8List input = Uint8List.fromList(chunk);
+        ByteData bd = input.buffer.asByteData();
+        for (int i = 0; i < 3; i++){
+          try {
+            int volt = bd.getInt16(4 + 2 * i, Endian.little);
+            cellValues.add(volt);
+          } catch (e) {
+            null;
+            break;
+          }
         }
-        i = frameStart + 4; // Переходим к следующему фрейму
+      } else {
+        continue;
       }
     }
 
     for (int i = 0; i < cellValues.length; i++){
-      data['cell ${i + 1}'] = '${cellValues[i] / 1000} V';
+      data['cell ${i + 1}'] = cellValues[i] / 1000;
     }
-    /*
-    List<int> frame = [];
-    int index = 0;
-    for (int i = 0; i < package.length; i++) {
-      var f = package[i];
-      if(f == 165){
-        if(frame.isEmpty){
-          frame.add(f);
-        } else {
-          Uint8List input = Uint8List.fromList(frame);
-          ByteData bd = input.buffer.asByteData();
-          for (int i = 0; i < 3; i++){
-            try {
-              int volt = bd.getInt16(4 + 2 * i, Endian.little);
-              volt > 0 ? data['cell ${index + 1}'] = volt / 1000 : null;
-              index++;
-            } catch (e) {
-              null;
-              break;
-            }
-          }
-          frame.clear();
-          frame.add(f);
-        }
-      } else {
-        frame.add(f);
-        if (i == package.length - 1) {
-          Uint8List input = Uint8List.fromList(frame);
-          ByteData bd = input.buffer.asByteData();
-          for (int i = 0; i < 3; i++){
-            try {
-              int volt = bd.getInt16(4 + 2 * i, Endian.little);
-              volt > 0 ? data['cell ${index + 1}'] = volt / 1000 : null;
-            } catch (e) {
-              null;
-              break;
-            }
-          }
-          frame.clear();
-        } else {
-          continue;
-        }
-      }
-    }
-    */
   }
-  
-  
   
   @override
   void decodeTemperature(List<int> package) {
@@ -205,7 +165,6 @@ class FFF0Implements extends FFF0Repository{
       }
     }
   }
-
 
   @override
   void decodeSOC(List<int> package) {

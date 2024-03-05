@@ -4,6 +4,8 @@ import 'package:compass/constants/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import '../data/hive_implements.dart';
+
 
 class ScanResultTile extends StatefulWidget {
   const ScanResultTile({Key? key, required this.result, this.onTap}) : super(key: key);
@@ -19,10 +21,12 @@ class _ScanResultTileState extends State<ScanResultTile> {
   BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
 
   late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
+  String techName = '';
 
   @override
   void initState() {
     super.initState();
+    getName();
     _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
       _connectionState = state;
       if (mounted) {
@@ -35,6 +39,14 @@ class _ScanResultTileState extends State<ScanResultTile> {
   void dispose() {
     _connectionStateSubscription.cancel();
     super.dispose();
+  }
+
+  Future getName() async {
+    DeviceIdentifier mac = widget.result.device.remoteId;
+    techName = await HiveImplements().getDeviceName(mac.toString());
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   String getNiceHexArray(List<int> bytes) {
@@ -63,7 +75,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(widget.result.device.platformName, overflow: TextOverflow.ellipsis, style: white16,),
+          Text('${widget.result.device.platformName}${techName.isEmpty ? '' : '\n($techName)'}', overflow: TextOverflow.clip, style: white16),
           Text('MAC: ${widget.result.device.remoteId.str}', style: white12,)
         ],
       );
@@ -124,21 +136,6 @@ class _ScanResultTileState extends State<ScanResultTile> {
         )
       ],
     );
-    
-    /*
-    ExpansionTile(
-      title: _buildTitle(context),
-      // leading: Text(widget.result.rssi.toString()),
-      trailing: _buildConnectButton(context),
-      children: <Widget>[
-        if (adv.advName.isNotEmpty) _buildAdvRow(context, 'Name', adv.advName),
-        if (adv.txPowerLevel != null) _buildAdvRow(context, 'Tx Power Level', '${adv.txPowerLevel}'),
-        if ((adv.appearance ?? 0) > 0) _buildAdvRow(context, 'Appearance', '0x${adv.appearance!.toRadixString(16)}'),
-        if (adv.msd.isNotEmpty) _buildAdvRow(context, 'Manufacturer Data', getNiceManufacturerData(adv.msd)),
-        if (adv.serviceUuids.isNotEmpty) _buildAdvRow(context, 'Service UUIDs', getNiceServiceUuids(adv.serviceUuids)),
-        if (adv.serviceData.isNotEmpty) _buildAdvRow(context, 'Service Data', getNiceServiceData(adv.serviceData)),
-      ],
-    );
-    */
   }
+
 }

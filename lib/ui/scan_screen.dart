@@ -3,15 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 import '../constants/bms_services.dart';
+import '../constants/loger.dart';
 import '../constants/styles.dart';
 import '../data/ffe0_controller_implements.dart';
 import '../data/fff0_controller_implements.dart';
 import '../providers/bms_provider.dart';
 import '../utils/snackbar.dart';
-import 'monitoring_device_screen.dart';
 import 'scan_result_tile.dart';
+import 'system_device_tile.dart';
 
 class ScanScreen extends ConsumerStatefulWidget {
   // ignore: prefer_typing_uninitialized_variables
@@ -25,13 +27,15 @@ class ScanScreen extends ConsumerStatefulWidget {
 class _ScanScreenState extends ConsumerState<ScanScreen> {
 
   List<ScanResult> scanResults = [];
+  List<BluetoothDevice> _systemDevices = [];
+  bool _isScanning = false;
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
   late StreamSubscription<bool> _isScanningSubscription;
 
   @override
   void initState() {
     super.initState();
-    
+    onScanPressed();
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) async {
       scanResults = results;
       if (mounted) {
@@ -42,6 +46,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     });
     
     _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
+      _isScanning = state;
       if (mounted) {
         setState(() {});
       }
@@ -58,12 +63,16 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
 
   Future onScanPressed() async {
     try {
+      _systemDevices.clear();
+      _systemDevices = await FlutterBluePlus.systemDevices;
+    } catch (e) {
+      log.d('System Devices Error:: $e');
+      Snackbar.show(ABC.b, prettyException("System Devices Error:", e), success: false);
+    }
+    try {
       await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10), withServices: requiredServices);
     } catch (e) {
       Snackbar.show(ABC.b, prettyException("ошибка запуска сканирования:", e), success: false);
-    }
-    if (mounted) {
-      setState(() {});
     }
   }
 
@@ -82,21 +91,31 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       if (requiredServices.contains(s)){
         if (s.toString() == 'ffe0'){
           widget.progress.show();
-          await FFE0Implements().connect(r);
-          String mac = r.device.remoteId.str;
-          Map<String, Widget> currentWidgets = ref.read(monitoringWidgets);
-          currentWidgets[mac] = MonitoringDeviceScreen(r: r);
-          ref.read(monitoringWidgets.notifier).state = currentWidgets;
-          widget.progress.dismiss();
+          try {
+            await FFE0Implements().connect(r);
+            String mac = r.device.remoteId.str;
+            Map<String, dynamic> currentWidgets = ref.read(monitoringWidgets);
+            currentWidgets[mac] = r;
+            ref.read(monitoringWidgets.notifier).state = currentWidgets;
+            widget.progress.dismiss();
+          } catch (e) {
+            Snackbar.show(ABC.b, prettyException("Ошибка при попытке подключения: ", e), success: false);
+            widget.progress.dismiss();
+          }
         } 
         if (s.toString() == 'fff0') {
           widget.progress.show();
-          await FFF0Implements().connect(r);
-          String mac = r.device.remoteId.str;
-          Map<String, Widget> currentWidgets = ref.read(monitoringWidgets);
-          currentWidgets[mac] = MonitoringDeviceScreen(r: r);
-          ref.read(monitoringWidgets.notifier).state = currentWidgets;
-          widget.progress.dismiss();
+          try {
+            await FFF0Implements().connect(r);
+            String mac = r.device.remoteId.str;
+            Map<String, dynamic> currentWidgets = ref.read(monitoringWidgets);
+            currentWidgets[mac] = r;
+            ref.read(monitoringWidgets.notifier).state = currentWidgets;
+            widget.progress.dismiss();
+          } catch (e) {
+            Snackbar.show(ABC.b, prettyException("Ошибка при попытке подключения: ", e), success: false);
+            widget.progress.dismiss();
+          }
         }
         break;
       }
@@ -105,10 +124,11 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
 
   void onDisconnectPressed(BluetoothDevice device) async {
     String mac = device.remoteId.str;
-    Map<String, Widget> currentWidgets = ref.read(monitoringWidgets);
-    currentWidgets.remove(mac);
-    ref.read(monitoringWidgets.notifier).state = currentWidgets;
-    await device.disconnect();
+    _systemDevices.removeWhere((element) => device.remoteId.str == mac);
+    Map<String, dynamic> currentResults = ref.read(monitoringWidgets);
+    currentResults.remove(mac);
+    ref.read(monitoringWidgets.notifier).state = currentResults;
+    await device.disconnect().then((value) => onScanPressed());
   }
 
   Widget buildScanButton(BuildContext context) {
@@ -150,48 +170,37 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     }).toList();
   }
 
+  List<Widget> _buildSystemDeviceTiles(BuildContext context) {
+    return _systemDevices.map((d) {
+      return SystemDeviceTile(
+        device: d,
+        onTap: () => onDisconnectPressed(d),
+      );
+    },
+    ).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
       key: Snackbar.snackBarKeyB,
-      child: Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            opacity: 0.7,
-            image: AssetImage('lib/images/atom.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 10,),
-            scanResults.isEmpty ? const SizedBox.shrink() : Expanded(
-              child: ListView(
-                physics: const BouncingScrollPhysics(),
-                controller: ScrollController(),
-                shrinkWrap: true,
-                children: <Widget>[
-                  ..._buildScanResultTiles(context),
-                ],
-              ),
-            ),
-            scanResults.isEmpty ? Expanded(
-              child: Center(child: Padding(
-                padding: const EdgeInsets.only(bottom: 80),
-                child: Text('нажмите поиск', style: white16,),
-              ))) 
-              : const SizedBox(height: 5,),
-            buildScanButton(context),
-            const SizedBox(height: 10)
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: const Color(0xFFf68800),
+          centerTitle: true,
+          title: Text('BMS устройства', style: dark18,),
+          actions: [
+            _isScanning ? const Padding(
+              padding: EdgeInsets.only(right: 25),
+              child: SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.black,),),
+            ) : 
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: IconButton(onPressed: onScanPressed, icon: Icon(MdiIcons.refreshCircle, size: 30,)),
+            )
           ],
         ),
-      ),
-      /*
-      child: Scaffold(
-        backgroundColor: Colors.black,
         body: Container(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
@@ -206,30 +215,33 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 10,),
-              scanResults.isEmpty ? const SizedBox.shrink() : Expanded(
+              _systemDevices.isEmpty && scanResults.isEmpty ? 
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 150),
+                    child: Text('BMS устройства не найдены', style: grey16,),
+                  )
+                )
+              ) :
+              Expanded(
                 child: ListView(
                   physics: const BouncingScrollPhysics(),
                   controller: ScrollController(),
                   shrinkWrap: true,
                   children: <Widget>[
+                    ..._buildSystemDeviceTiles(context),
                     ..._buildScanResultTiles(context),
                   ],
                 ),
               ),
-              scanResults.isEmpty ? Expanded(
-                child: Center(child: Padding(
-                  padding: const EdgeInsets.only(bottom: 80),
-                  child: Text('нажмите поиск', style: white16,),
-                ))) 
-                : const SizedBox(height: 5,),
-              buildScanButton(context),
-              const SizedBox(height: 10)
+              // buildScanButton(mainContext),
+              // const SizedBox(height: 10)
             ],
           ),
         ),
-        // bottomNavigationBar: bottomNavBar(),
       ),
-      */
     );
   }
+
 }

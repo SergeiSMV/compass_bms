@@ -1,12 +1,13 @@
-
 import 'package:compass/constants/styles.dart';
-import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
+import '../constants/stark_devices.dart';
+import '../data/hive_implements.dart';
 import '../providers/bms_provider.dart';
+import 'rename_device.dart';
 
 class MonitoringDeviceScreen extends ConsumerStatefulWidget {
   final ScanResult r;
@@ -18,8 +19,11 @@ class MonitoringDeviceScreen extends ConsumerStatefulWidget {
 
 class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen> {
 
-  late String mac;
-  late String name;
+  TextEditingController nameController = TextEditingController();
+
+  late DeviceIdentifier mac;
+  late String deviceName;
+  String name = '';
 
   @override
   void initState() {
@@ -29,14 +33,18 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
 
   @override
   void dispose() {
+    nameController.clear();
+    nameController.dispose();
     super.dispose();
   }
 
-  void initDeviceInfo(){
-    setState(() {
-      mac = widget.r.device.remoteId.str;
-      name = widget.r.device.platformName.isEmpty ? 'NoName' : widget.r.device.platformName.toString();
-    });
+  void initDeviceInfo() async {
+    mac = widget.r.device.remoteId;
+    deviceName = widget.r.device.platformName.isEmpty ? 'NoName' : widget.r.device.platformName.toString();
+    nameController.text = await HiveImplements().getDeviceName(mac.toString());
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Widget loading(){
@@ -62,40 +70,55 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
   }
 
   Widget remainIndicator(int remain){
-    Color color;
-    if (remain >= 90) {
-      color = Colors.lightGreen;
-    } else if (remain >= 80) {
-      color = Colors.lightGreen.shade400;
-    } else if (remain >= 70) {
-      color = Colors.lightGreen.shade200;
-    } else if (remain >= 60) {
-      color = Colors.orange.shade200;
-    } else if (remain >= 40) {
-      color = Colors.orange.shade300;
-    } else if (remain >= 40) {
-      color = Colors.orange;
-    } else if (remain >= 20) {
-      color = Colors.orange.shade800;
-    } else if (remain >= 10) {
-      color = Colors.orange.shade900;
-    } else {
-      color = Colors.red;
-    }
+    List<Color> colorsGradient = [
+      Colors.red,
+      Colors.orange.shade900,
+      Colors.orange.shade800,
+      Colors.orange,
+      Colors.orange.shade300,
+      Colors.yellow.shade600,
+      Colors.yellow,
+      Colors.lightGreen.shade200,
+      Colors.lightGreen.shade300,
+      Colors.lightGreen.shade400,
+      Colors.lightGreen,
+      Colors.lightGreen.shade600,
+      Colors.lightGreen.shade700
+    ];
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 0),
       child: Row(
         children: [
-          
-          
           Flexible(
-            child: LinearProgressIndicator(
-              value: remain / 100.0,
-              backgroundColor: Colors.grey.shade300,
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-              minHeight: 10,
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-            ),
+            child: Container(
+              height: 10, // Высота индикатора
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8), // Закругление краев
+                color: Colors.grey[300], // Фон индикатора
+              ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: remain / 100.0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: colorsGradient, // Градиент от красного к зеленому
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  )
+                ],
+              ),
+            )
           ),
           const SizedBox(width: 10),
           Text('$remain%', style: grey14,),
@@ -123,7 +146,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
         ],
       ),
       child: Center(
-        child: Text('${value ?? '0'} $unit', style: style,),
+        child: Text('${value?.toStringAsFixed(1) ?? '0'} $unit', style: style,),
       ),
     );
   }
@@ -174,7 +197,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                     ],
                   ),
                   const SizedBox(width: 5),
-                  Expanded(child: Text('${data[cellKey]}', style: dark16)),
+                  Expanded(child: Text('${data[cellKey].toStringAsFixed(2)} V', style: dark16)),
                 ],
               ),
             )
@@ -244,13 +267,76 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
 
   }
 
+  Future disableWidget() async {
+    String removeMac = widget.r.device.remoteId.str;
+    final data = ref.read(monitoringWidgets);
+    data.removeWhere((key, value) => key == removeMac);
+    ref.read(monitoringWidgets.notifier).state = Map.from(data);
+  }
+
+  void disconnect() async {
+    await disableWidget().then((_) => widget.r.device.disconnect());
+  }
+  
+  Widget options(BuildContext context){
+    return Padding(
+      padding: const EdgeInsets.only(left: 5, right: 5),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              await renameDevice(context, nameController, mac.toString()).then((_) => setState((){}));
+            }, 
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(MdiIcons.fountainPenTip, color: Colors.white,),
+                const SizedBox(width: 5,),
+                Text('переименовать', style: white14,)
+              ],
+            )
+          ),
+      
+          const Spacer(),
+      
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: disconnect, 
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(MdiIcons.bluetoothOff, color: Colors.white,),
+                const SizedBox(width: 5,),
+                Text('отключить', style: white14,)
+              ],
+            )
+          ),
+        ],
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, child){
+        
         final batteryData = ref.watch(bmsDataStreamProvider(widget.r));
+        
         return batteryData.when(
-          error: (error, stack) => Text('Error: $error'), 
+          error: (error, stack) {
+            disconnect();
+            return const SizedBox.shrink();
+          }, 
           loading: () => loading(),
           data: (data) {
             return Container(
@@ -260,91 +346,116 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                 borderRadius: BorderRadius.all(Radius.circular(8)),
                 color: Colors.white,
               ),
-              child: ExpansionTileCard(
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(name, style: dark16,),
-                          Text('MAC: $mac', style: dark12,),
-                        ],
-                      ),
-                    ),
-                    /*
-                    Text('${data['power'] ?? ''}W', style: grey14,),
-                    Icon(
-                      data['current'] == null || data['current'] == 0 ? MdiIcons.batteryOutline : (data['current'] > 0 ? MdiIcons.powerPlugBattery : MdiIcons.batteryCharging100), 
-                      color: data['current'] == null || data['current'] == 0 ? Colors.grey : (data['current'] > 0 ? Colors.green : Colors.red),
-                      size: 20,
-                    )
-                    */
-                  ],
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 8),
-                  child: Column(
+              child: Theme(
+                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  title: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
                         children: [
-                          Flexible(child: subtitle(data['voltage'], 'V')),
-                          const SizedBox(width: 5),
-                          Flexible(child: subtitle(data['current'], 'A'))
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('$deviceName ${nameController.text.isEmpty ? '' : '(${nameController.text})'}', style: dark16,),
+                                Text('MAC: ${mac.toString()}', style: dark12,),
+                              ],
+                            ),
+                          ),
+                          
+                          starkDevices.contains(mac) ? Image.asset('lib/images/stark.png', scale: 3.5) : const SizedBox.shrink(),
+                          Icon(MdiIcons.alertCircle, color: Colors.red),
                         ],
                       ),
-                      remainIndicator(data['remain'] ?? 0),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 8),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(child: subtitle(data['voltage'], 'V')),
+                                const SizedBox(width: 5),
+                                Flexible(child: subtitle(data['current'], 'A'))
+                              ],
+                            ),
+                            remainIndicator(data['remain'] ?? 0),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
+                  children: [
+                    const Divider(
+                      indent: 8,
+                      endIndent: 8,
+                      thickness: 1.0,
+                      height: 1.0,
+                    ),
+                    const SizedBox(height: 15,),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8, right: 8),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.only(top: 2, bottom: 2),
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(Radius.circular(5)),
+                          color: Colors.grey.shade300,
+                        ),
+                        child: Center(child: Text('напряжение ячеек', style: dark16,))
+                      ),
+                    ),
+                    const SizedBox(height: 5,),
+                    cellsInfo(data),
+                    const SizedBox(height: 15),
+                    const Divider(
+                      indent: 8,
+                      endIndent: 8,
+                      thickness: 1.0,
+                      height: 1.0,
+                    ),
+                    const SizedBox(height: 15),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8, right: 8),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.only(top: 2, bottom: 2),
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(Radius.circular(5)),
+                          color: Colors.grey.shade300,
+                        ),
+                        child: Center(child: Text('температура', style: dark16,))
+                      ),
+                    ),
+                    const SizedBox(height: 5,),
+                    tempInfo(data),
+                    const SizedBox(height: 15,),
+                    const Divider(
+                      indent: 8,
+                      endIndent: 8,
+                      thickness: 1.0,
+                      height: 1.0,
+                    ),
+                    const SizedBox(height: 15,),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8, right: 8),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.only(top: 2, bottom: 2),
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(Radius.circular(5)),
+                          color: Colors.grey.shade300,
+                        ),
+                        child: Center(child: Text('опции', style: dark16,))
+                      ),
+                    ),
+                    const SizedBox(height: 5,),
+                    options(context),
+                    const SizedBox(height: 15),
+                  ],
                 ),
-                children: [
-                  const Divider(
-                    indent: 8,
-                    endIndent: 8,
-                    thickness: 1.0,
-                    height: 1.0,
-                  ),
-                  const SizedBox(height: 15,),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8, right: 8),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.only(top: 2, bottom: 2),
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.all(Radius.circular(5)),
-                        color: Colors.grey.shade300,
-                      ),
-                      child: Center(child: Text('напряжение ячеек', style: dark16,))
-                    ),
-                  ),
-                  const SizedBox(height: 5,),
-                  cellsInfo(data),
-                  const SizedBox(height: 15),
-                  const Divider(
-                    indent: 8,
-                    endIndent: 8,
-                    thickness: 1.0,
-                    height: 1.0,
-                  ),
-                  const SizedBox(height: 15),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8, right: 8),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.only(top: 2, bottom: 2),
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.all(Radius.circular(5)),
-                        color: Colors.grey.shade300,
-                      ),
-                      child: Center(child: Text('температура', style: dark16,))
-                    ),
-                  ),
-                  const SizedBox(height: 5,),
-                  tempInfo(data),
-                  const SizedBox(height: 15),
-                ],
               )
             );
           }, 
@@ -352,4 +463,5 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
       }
     );
   }
+
 }
