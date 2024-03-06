@@ -17,7 +17,7 @@ class MonitoringDeviceScreen extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _MonitoringDeviceScreenState();
 }
 
-class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen> {
+class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen> with SingleTickerProviderStateMixin {
 
   TextEditingController nameController = TextEditingController();
 
@@ -25,17 +25,41 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
   late String deviceName;
   String name = '';
 
+  late AnimationController _controller;
+  late Animation<double> _iconTurns;
+  late Animation<double> _heightFactor;
+  bool _isExpanded = false;
+
+
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _iconTurns = Tween<double>(begin: 0.0, end: 0.5).animate(_controller);
+    _heightFactor = _controller.drive(CurveTween(curve: Curves.easeInOut));
     initDeviceInfo();
   }
 
   @override
   void dispose() {
+    _controller.dispose();
     nameController.clear();
     nameController.dispose();
     super.dispose();
+  }
+
+  void handleTap() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+      if (_isExpanded) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    });
   }
 
   void initDeviceInfo() async {
@@ -91,10 +115,18 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
         children: [
           Flexible(
             child: Container(
-              height: 10, // Высота индикатора
+              height: 15, // Высота индикатора
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8), // Закругление краев
                 color: Colors.grey[300], // Фон индикатора
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade600,
+                    spreadRadius: 0.0,
+                    blurRadius: 0.5,
+                    offset: const Offset(0, 2), // changes position of shadow
+                  ),
+                ],
               ),
               child: Stack(
                 children: [
@@ -121,7 +153,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
             )
           ),
           const SizedBox(width: 10),
-          Text('$remain%', style: grey14,),
+          Text('$remain%', style: grey16,),
         ],
       ),
     );
@@ -132,13 +164,13 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
     TextStyle style = value != null && unit == 'A' ? (value < 0 ? red18 : (value > 0 ? green18 : dark18)) : dark18;
 
     return Container(
-      height: 40,
+      height: 50,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         color: Colors.grey.shade200,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade400,
+            color: Colors.grey.shade500,
             spreadRadius: 0.0,
             blurRadius: 0.5,
             offset: const Offset(0, 2),
@@ -339,8 +371,9 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
           }, 
           loading: () => loading(),
           data: (data) {
+            // фоновый еонтейнер
             return Container(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(3),
               width: MediaQuery.of(context).size.width,
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -348,114 +381,157 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
               ),
               child: Theme(
                 data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                child: ExpansionTile(
-                  title: Column(
+                // контейнер с карточкой
+                child: Container(
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                    color: Colors.white,
+                  ),
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('$deviceName ${nameController.text.isEmpty ? '' : '(${nameController.text})'}', style: dark16,),
-                                Text('MAC: ${mac.toString()}', style: dark12,),
-                              ],
-                            ),
+                      InkWell(
+                        onTap: handleTap,
+                        child: Container(
+                          padding: const EdgeInsets.only(left: 8, right: 8, top: 5, bottom: 5),
+                          width: double.infinity,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('$deviceName ${nameController.text.isEmpty ? '' : '\n(${nameController.text})'}', style: dark16,),
+                                        Text('MAC: ${mac.toString()}', style: dark12,),
+                                      ],
+                                    ),
+                                  ),
+                                  starkDevices.contains(mac) ? Image.asset('lib/images/stark.png', scale: 3.5) : const SizedBox.shrink(),
+                                  Icon(MdiIcons.alertCircle, color: Colors.red),
+                                ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8, bottom: 8),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Flexible(child: subtitle(data['voltage'], 'V')),
+                                        const SizedBox(width: 5),
+                                        Flexible(child: subtitle(data['current'], 'A'))
+                                      ],
+                                    ),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Expanded(child: remainIndicator(data['remain'] ?? 0)),
+                                        const SizedBox(width: 25,),
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 18),
+                                          child: RotationTransition(
+                                            turns: _iconTurns,
+                                            child: const Icon(Icons.expand_more, size: 30,),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          
-                          starkDevices.contains(mac) ? Image.asset('lib/images/stark.png', scale: 3.5) : const SizedBox.shrink(),
-                          Icon(MdiIcons.alertCircle, color: Colors.red),
-                        ],
+                        ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 8),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              children: [
-                                Flexible(child: subtitle(data['voltage'], 'V')),
-                                const SizedBox(width: 5),
-                                Flexible(child: subtitle(data['current'], 'A'))
-                              ],
+                  
+                      AnimatedBuilder(
+                        animation: _controller,
+                        builder: (BuildContext context, Widget? child) {
+                          return ClipRect(
+                            child: Align(
+                              heightFactor: _heightFactor.value,
+                              child: child,
                             ),
-                            remainIndicator(data['remain'] ?? 0),
+                          );
+                        },
+                        child: Column(
+                          children: <Widget>[
+                            const Divider(
+                              indent: 8,
+                              endIndent: 8,
+                              thickness: 1.0,
+                              height: 1.0,
+                            ),
+                            const SizedBox(height: 15,),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8, right: 8),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.only(top: 2, bottom: 2),
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                  color: Colors.grey.shade300,
+                                ),
+                                child: Center(child: Text('напряжение ячеек', style: dark16,))
+                              ),
+                            ),
+                            const SizedBox(height: 5,),
+                            cellsInfo(data),
+                            const SizedBox(height: 15),
+                            const Divider(
+                              indent: 8,
+                              endIndent: 8,
+                              thickness: 1.0,
+                              height: 1.0,
+                            ),
+                            const SizedBox(height: 15),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8, right: 8),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.only(top: 2, bottom: 2),
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                  color: Colors.grey.shade300,
+                                ),
+                                child: Center(child: Text('температура', style: dark16,))
+                              ),
+                            ),
+                            const SizedBox(height: 5,),
+                            tempInfo(data),
+                            const SizedBox(height: 15,),
+                            const Divider(
+                              indent: 8,
+                              endIndent: 8,
+                              thickness: 1.0,
+                              height: 1.0,
+                            ),
+                            const SizedBox(height: 15,),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8, right: 8),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.only(top: 2, bottom: 2),
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                  color: Colors.grey.shade300,
+                                ),
+                                child: Center(child: Text('опции', style: dark16,))
+                              ),
+                            ),
+                            const SizedBox(height: 5,),
+                            options(context),
+                            const SizedBox(height: 15),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  children: [
-                    const Divider(
-                      indent: 8,
-                      endIndent: 8,
-                      thickness: 1.0,
-                      height: 1.0,
-                    ),
-                    const SizedBox(height: 15,),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8, right: 8),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.only(top: 2, bottom: 2),
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(5)),
-                          color: Colors.grey.shade300,
-                        ),
-                        child: Center(child: Text('напряжение ячеек', style: dark16,))
-                      ),
-                    ),
-                    const SizedBox(height: 5,),
-                    cellsInfo(data),
-                    const SizedBox(height: 15),
-                    const Divider(
-                      indent: 8,
-                      endIndent: 8,
-                      thickness: 1.0,
-                      height: 1.0,
-                    ),
-                    const SizedBox(height: 15),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8, right: 8),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.only(top: 2, bottom: 2),
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(5)),
-                          color: Colors.grey.shade300,
-                        ),
-                        child: Center(child: Text('температура', style: dark16,))
-                      ),
-                    ),
-                    const SizedBox(height: 5,),
-                    tempInfo(data),
-                    const SizedBox(height: 15,),
-                    const Divider(
-                      indent: 8,
-                      endIndent: 8,
-                      thickness: 1.0,
-                      height: 1.0,
-                    ),
-                    const SizedBox(height: 15,),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8, right: 8),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.only(top: 2, bottom: 2),
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(5)),
-                          color: Colors.grey.shade300,
-                        ),
-                        child: Center(child: Text('опции', style: dark16,))
-                      ),
-                    ),
-                    const SizedBox(height: 5,),
-                    options(context),
-                    const SizedBox(height: 15),
-                  ],
-                ),
+                )
               )
             );
           }, 
