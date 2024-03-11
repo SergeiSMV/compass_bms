@@ -7,10 +7,14 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'constants/loger.dart';
 import 'ui/bluetooth_off_screen.dart';
+
+const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'default');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  log.d('flavor: $flavor');
   await Hive.initFlutter();
   await Hive.openBox('hiveStorage');
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
@@ -55,8 +59,6 @@ class _AppState extends State<App> {
     Widget screen = _adapterState == BluetoothAdapterState.on
         ? const MainScreen()
         : BluetoothOffScreen(adapterState: _adapterState);
-
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       color: Colors.lightBlue,

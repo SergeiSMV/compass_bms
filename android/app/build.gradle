@@ -54,6 +54,22 @@ android {
         versionName flutterVersionName
     }
 
+    flavorDimensions "versionType"
+
+    productFlavors {
+        stark {
+            dimension "versionType"
+            applicationId "com.example.compass.stark"
+            versionName flutterVersionName + "-stark"
+        }
+
+        oem {
+            dimension "versionType"
+            applicationId "com.example.compass.oem"
+            versionName flutterVersionName + "-oem"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

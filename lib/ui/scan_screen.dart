@@ -10,6 +10,7 @@ import '../constants/loger.dart';
 import '../constants/styles.dart';
 import '../data/ffe0_controller_implements.dart';
 import '../data/fff0_controller_implements.dart';
+import '../main.dart';
 import '../providers/bms_provider.dart';
 import '../utils/snackbar.dart';
 import 'scan_result_tile.dart';
@@ -204,7 +205,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         body: Container(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
-          decoration: const BoxDecoration(
+          decoration: flavor == 'oem' ? const BoxDecoration() : const BoxDecoration(
             image: DecorationImage(
               opacity: 0.7,
               image: AssetImage('lib/images/atom.png'),

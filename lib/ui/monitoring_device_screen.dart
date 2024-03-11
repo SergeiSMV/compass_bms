@@ -6,6 +6,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 
 import '../constants/stark_devices.dart';
 import '../data/hive_implements.dart';
+import '../main.dart';
 import '../providers/bms_provider.dart';
 import 'rename_device.dart';
 
@@ -371,7 +372,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
           }, 
           loading: () => loading(),
           data: (data) {
-            // фоновый еонтейнер
+            // фоновый контейнер
             return Container(
               padding: const EdgeInsets.all(3),
               width: MediaQuery.of(context).size.width,
@@ -410,7 +411,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                                       ],
                                     ),
                                   ),
-                                  starkDevices.contains(mac) ? Image.asset('lib/images/stark.png', scale: 3.5) : const SizedBox.shrink(),
+                                  starkDevices.contains(mac) && flavor == 'stark' ? Image.asset('lib/images/stark.png', scale: 3.5) : const SizedBox.shrink(),
                                   Icon(MdiIcons.alertCircle, color: Colors.red),
                                 ],
                               ),
@@ -460,12 +461,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                         },
                         child: Column(
                           children: <Widget>[
-                            const Divider(
-                              indent: 8,
-                              endIndent: 8,
-                              thickness: 1.0,
-                              height: 1.0,
-                            ),
+                            const Divider(indent: 8, endIndent: 8, thickness: 1.0, height: 1.0,),
                             const SizedBox(height: 15,),
                             Padding(
                               padding: const EdgeInsets.only(left: 8, right: 8),
@@ -482,12 +478,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                             const SizedBox(height: 5,),
                             cellsInfo(data),
                             const SizedBox(height: 15),
-                            const Divider(
-                              indent: 8,
-                              endIndent: 8,
-                              thickness: 1.0,
-                              height: 1.0,
-                            ),
+                            const Divider(indent: 8, endIndent: 8, thickness: 1.0, height: 1.0,),
                             const SizedBox(height: 15),
                             Padding(
                               padding: const EdgeInsets.only(left: 8, right: 8),
@@ -504,12 +495,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                             const SizedBox(height: 5,),
                             tempInfo(data),
                             const SizedBox(height: 15,),
-                            const Divider(
-                              indent: 8,
-                              endIndent: 8,
-                              thickness: 1.0,
-                              height: 1.0,
-                            ),
+                            const Divider(indent: 8, endIndent: 8, thickness: 1.0, height: 1.0,),
                             const SizedBox(height: 15,),
                             Padding(
                               padding: const EdgeInsets.only(left: 8, right: 8),

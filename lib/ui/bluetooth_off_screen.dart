@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../constants/styles.dart';
+import '../main.dart';
 import '../utils/snackbar.dart';
 
 class BluetoothOffScreen extends StatelessWidget {
@@ -49,27 +50,6 @@ class BluetoothOffScreen extends StatelessWidget {
           child: Text('включить', style: dark16),
         )
       )
-      
-      /*
-      Container(
-        decoration: BoxDecoration(color: const Color(0xFFf68800), borderRadius: BorderRadius.circular(20)),
-        height: 40,
-        child: Center(
-          child: TextButton(
-            onPressed: () async {
-              try {
-                if (Platform.isAndroid) {
-                  await FlutterBluePlus.turnOn();
-                }
-              } catch (e) {
-                Snackbar.show(ABC.a, prettyException("Error Turning On:", e), success: false);
-              }
-            }, 
-            child: Text('включить', style: dark16),
-          )
-        ),
-      ),
-      */
     );
   }
 
