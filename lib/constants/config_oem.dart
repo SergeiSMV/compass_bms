@@ -1,3 +1,3 @@
 const cnfg = "oem";
 
-// flutter build apk --dart-define=FLAVOR=oem
+// flutter build apk --flavor oem --dart-define=FLAVOR=oem --release

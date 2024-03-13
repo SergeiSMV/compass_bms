@@ -1,3 +1,3 @@
 const cnfg = "stark";
 
-// flutter build apk --dart-define=FLAVOR=stark
+// flutter build apk --flavor stark --dart-define=FLAVOR=stark --release
