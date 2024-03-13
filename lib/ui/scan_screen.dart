@@ -188,7 +188,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          backgroundColor: const Color(0xFFf68800),
+          backgroundColor: flavor == 'oem' ? const Color(0xFF42fff9) : const Color(0xFFf68800),
           centerTitle: true,
           title: Text('BMS устройства', style: dark18,),
           actions: [
@@ -205,7 +205,13 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         body: Container(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
-          decoration: flavor == 'oem' ? const BoxDecoration() : const BoxDecoration(
+          decoration: flavor == 'oem' ? const BoxDecoration(
+            image: DecorationImage(
+              opacity: 0.5,
+              image: AssetImage('lib/images/oem_bg.png'),
+              fit: BoxFit.cover,
+            ),
+          ) : const BoxDecoration(
             image: DecorationImage(
               opacity: 0.7,
               image: AssetImage('lib/images/atom.png'),
@@ -220,7 +226,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
               Expanded(
                 child: Center(
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 150),
+                    padding: const EdgeInsets.only(top: 80),
                     child: Text('BMS устройства не найдены', style: grey16,),
                   )
                 )

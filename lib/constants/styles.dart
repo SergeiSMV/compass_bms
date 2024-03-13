@@ -54,3 +54,13 @@ TextStyle red16 = GoogleFonts.openSans(color: Colors.red, fontSize: 16);
 TextStyle red18 = GoogleFonts.openSans(color: Colors.red, fontSize: 18);
 TextStyle red20 = GoogleFonts.openSans(color: Colors.red, fontSize: 20);
 TextStyle red22 = GoogleFonts.openSans(color: Colors.red, fontSize: 22);
+
+TextStyle orange10 = GoogleFonts.openSans(color: Colors.orange, fontSize: 10);
+TextStyle orange12 = GoogleFonts.openSans(color: Colors.orange, fontSize: 12);
+TextStyle orange13 = GoogleFonts.openSans(color: Colors.orange, fontSize: 13);
+TextStyle orange14 = GoogleFonts.openSans(color: Colors.orange, fontSize: 14);
+TextStyle orange15 = GoogleFonts.openSans(color: Colors.orange, fontSize: 15);
+TextStyle orange16 = GoogleFonts.openSans(color: Colors.orange, fontSize: 16);
+TextStyle orange18 = GoogleFonts.openSans(color: Colors.orange, fontSize: 18);
+TextStyle orange20 = GoogleFonts.openSans(color: Colors.orange, fontSize: 20);
+TextStyle orange22 = GoogleFonts.openSans(color: Colors.orange, fontSize: 22);

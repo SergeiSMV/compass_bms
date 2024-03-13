@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../constants/styles.dart';
+import '../main.dart';
 import '../utils/snackbar.dart';
 
 class BluetoothOffScreen extends StatelessWidget {
@@ -33,7 +34,7 @@ class BluetoothOffScreen extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20, right: 70, left: 70),
       child: ElevatedButton(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) => const Color(0xFFf68800)),
+          backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) => flavor == 'oem' ? const Color(0xFF42fff9) : const Color(0xFFf68800)),
         ),
         onPressed: () async {
           try {

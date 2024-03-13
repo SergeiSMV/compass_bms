@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:compass/utils/extra.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import '../constants/loger.dart';
 import '../domain/fff0_controller_repository.dart';
 
 class FFF0Implements extends FFF0Repository{
@@ -16,7 +17,8 @@ class FFF0Implements extends FFF0Repository{
   static List<int> cellVoltageRequest = [0xA5, 0x80, 0x95, 8, 0, 0, 0, 0, 0, 0, 0, 0];
   static List<int> temperatureRequest = [0xA5, 0x80, 0x96, 8, 0, 0, 0, 0, 0, 0, 0, 0];
   static List<int> socRequest = [0xA5, 0x80, 0x90, 8, 0, 0, 0, 0, 0, 0, 0, 0];
-  static List requests = [cellVoltageRequest, temperatureRequest, socRequest];
+  static List<int> errorRequest = [0xA5, 0x80, 0x98, 8, 0, 0, 0, 0, 0, 0, 0, 0];
+  static List requests = [cellVoltageRequest, temperatureRequest, socRequest, errorRequest];
 
   BluetoothCharacteristic? notifyChar;
   StreamSubscription<dynamic>? charSubscription;
@@ -87,16 +89,20 @@ class FFF0Implements extends FFF0Repository{
   void decodePackage(List<int> package) {
     if (package[0] == 165 && package[1] == 1){
       switch(package[2]){
-        case 149:
+        case 149: // Cell voltage 1~48
           decodeCellVoltage(package);
           break;
-        case 150:
+        case 150: // Monomer temperature 1~16
           decodeTemperature(package);
           break;
-        case 144:
+        case 144: // SOC of Total Voltage Current
           decodeSOC(package);
           break;
+        case 152: // Battery failure status
+          decodeError(package);
+          break;
         default:
+          log.d('default package: $package');
           break;
       }
     } else {
@@ -182,5 +188,9 @@ class FFF0Implements extends FFF0Repository{
     data['remain'] = remain ~/ 10;
   }
   
+  @override
+  void decodeError(List<int> package) {
+    
+  }
 
 }

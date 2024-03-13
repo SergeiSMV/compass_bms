@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
+import '../main.dart';
 import '../providers/bms_provider.dart';
 import 'monitoring_device_screen.dart';
 
@@ -25,7 +26,7 @@ class _MonitoringScreenState extends ConsumerState<MonitoringScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFf68800),
+        backgroundColor: flavor == 'oem' ? const Color(0xFF42fff9) : const Color(0xFFf68800),
         centerTitle: true,
         title: Text('мониторинг устройств', style: dark18,),
       ),
@@ -39,7 +40,7 @@ class _MonitoringScreenState extends ConsumerState<MonitoringScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(MdiIcons.clipboardSearchOutline, size: 50, color: Colors.orange,),
+                Icon(MdiIcons.clipboardSearchOutline, size: 50, color: flavor == 'oem' ? const Color(0xFF42fff9) : Colors.orange,),
                 const SizedBox(height: 10,),
                 Text('не выбрано\nни одного устройства,\nнечего мониторить', style: grey16, textAlign: TextAlign.center,),
               ],

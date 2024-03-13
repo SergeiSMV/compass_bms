@@ -43,6 +43,7 @@ dependencies:
   google_nav_bar: ^5.0.6
   flutter_progress_hud: ^2.0.2
   hive_flutter: ^1.1.0
+  animated_text_kit: ^4.2.2
 
 dev_dependencies:
   flutter_test:

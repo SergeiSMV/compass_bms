@@ -16,6 +16,8 @@ abstract class FFF0Repository {
 
   void decodeSOC(List<int> package);
 
+  void decodeError(List<int> package);
+
   int calculatedCrc(List<int> requestData);
   
   void disconnect();

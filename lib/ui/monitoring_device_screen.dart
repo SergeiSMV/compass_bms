@@ -119,7 +119,12 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
               height: 15, // Высота индикатора
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8), // Закругление краев
-                color: Colors.grey[300], // Фон индикатора
+                // color: Colors.grey[300], // Фон индикатора
+                gradient: LinearGradient(
+                  colors: colorsGradient, // Градиент от красного к зеленому
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.shade600,
@@ -132,18 +137,20 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
               child: Stack(
                 children: [
                   Positioned.fill(
+                    
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: remain / 100.0,
+                        alignment: Alignment.centerRight,
+                        widthFactor: 1 - (remain / 100.0),
                         child: Container(
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: colorsGradient, // Градиент от красного к зеленому
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
+                            color: Colors.grey[300],
+                            // gradient: LinearGradient(
+                            //   colors: colorsGradient, // Градиент от красного к зеленому
+                            //   begin: Alignment.centerLeft,
+                            //   end: Alignment.centerRight,
+                            // ),
                           ),
                         ),
                       ),
@@ -412,7 +419,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                                     ),
                                   ),
                                   starkDevices.contains(mac) && flavor == 'stark' ? Image.asset('lib/images/stark.png', scale: 3.5) : const SizedBox.shrink(),
-                                  Icon(MdiIcons.alertCircle, color: Colors.red),
+                                  // Icon(MdiIcons.alertCircle, color: Colors.red),
                                 ],
                               ),
                               Padding(

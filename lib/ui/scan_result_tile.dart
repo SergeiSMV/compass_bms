@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../data/hive_implements.dart';
+import '../main.dart';
 
 
 class ScanResultTile extends StatefulWidget {
@@ -90,7 +91,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
   Widget _buildConnectButton(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: isConnected ? Colors.red : Colors.orange,
+        backgroundColor: isConnected ? Colors.red : flavor == 'oem' ? const Color(0xFF42fff9) : Colors.orange,
         foregroundColor: Colors.white,
       ),
       onPressed: (widget.result.advertisementData.connectable) ? widget.onTap : null,
