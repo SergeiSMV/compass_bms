@@ -1,4 +1,5 @@
 import 'package:compass/constants/styles.dart';
+import 'package:compass/data/ffe0_controller_implements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -519,6 +520,18 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                             const SizedBox(height: 5,),
                             options(context),
                             const SizedBox(height: 15),
+                            Text('Testing', style: dark18,),
+                            const SizedBox(height: 15),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: (){
+                                FFE0Implements().testData(widget.r);
+                              }, 
+                              child: Text('запросить', style: white14,)
+                            )
                           ],
                         ),
                       ),

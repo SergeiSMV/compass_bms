@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:compass/utils/extra.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import '../constants/loger.dart';
 import '../domain/ffe0_controller_repository.dart';
 
 class FFE0Implements extends FFE0Repository{
@@ -34,7 +36,7 @@ class FFE0Implements extends FFE0Repository{
   Future<Stream<Map<String, dynamic>>> streamData(ScanResult r) async {
     streamController = StreamController<Map<String, dynamic>>.broadcast();
     List<BluetoothService> services = await r.device.discoverServices();
-
+    
     try {
       var service = services.firstWhere((s) => s.uuid == targetService);
       var notifyChar = service.characteristics.firstWhere((c) => c.uuid == targetChar);
@@ -53,7 +55,7 @@ class FFE0Implements extends FFE0Repository{
               if(isCrcValid){
                 Map<String, dynamic> data = decodePackage(package);
                 streamController!.add(data);
-              } 
+              }
               package.clear();
               package.addAll(value);
             }
@@ -97,6 +99,38 @@ class FFE0Implements extends FFE0Repository{
     return data;
   }
   
+
+  @override
+  Future<void> testData(ScanResult r) async {
+    
+    List<BluetoothService> services = await r.device.discoverServices();
+    var service = services.firstWhere((s) => s.uuid == Guid('f000ffc0-0451-4000-b000-000000000000'));
+    var char = service.characteristics.firstWhere((c) => c.uuid == Guid('f000ffc1-0451-4000-b000-000000000000'));
+
+    // List<int> hexRequest = [0x4E, 0x57, 0x00, 0x13, 0x00, 0x00, 0x00, 0x00, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x00, 0x00, 0x01, 0x29];
+    // List<int> intRequest = [78, 87, 0, 19, 0, 0, 0, 0, 6, 3, 0, 0, 0, 0, 0, 0, 104, 0, 0, 1, 41];
+    List<int> hexRequest = [0x4E, 0x57, 0x00, 0x13, 0x00, 0x00, 0x00, 0x00, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x00, 0x00, 0x01, 0x29];
+    List<int> intRequest = [78, 87, 0, 19, 0, 0, 0, 0, 6, 1, 0, 0, 0, 0, 0, 0, 104];
+
+    int calculatedCrc = intRequest.sublist(0, intRequest.length).reduce((sum, current) => sum + current) & 0xFF;
+    intRequest.add(calculatedCrc);
+    // intRequest.add(calculatedCrc >> 8);
+    // intRequest.add(calculatedCrc >> 0);
+
+    log.d('intRequest: $intRequest');
+
+    
+    await char.write(intRequest, withoutResponse: false);
+
+    await char.setNotifyValue(true).then((_) async {
+      char.lastValueStream.listen((value) async {
+        log.d('value: $value');
+      });
+    });
+    
+    
+  }
+
   @override
   void disconnect() {
     notifyChar?.setNotifyValue(false);
