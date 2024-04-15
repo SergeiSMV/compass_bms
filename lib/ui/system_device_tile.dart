@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:compass/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import '../constants/stark_devices.dart';
 import '../constants/styles.dart';
 import '../data/hive_implements.dart';
 
@@ -63,7 +65,7 @@ class _SystemDeviceTileState extends State<SystemDeviceTile> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text('${widget.device.platformName}${techName.isEmpty ? '' : '\n($techName)'}', overflow: TextOverflow.clip, style: white16,),
-          Text('MAC: ${widget.device.remoteId.str}', style: white12,)
+          // Text('MAC: ${widget.device.remoteId.str}', style: white12,)
         ],
       );
     } else {
@@ -83,6 +85,8 @@ class _SystemDeviceTileState extends State<SystemDeviceTile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              starkDevices.contains(widget.device.remoteId) && flavor == 'stark' ? Image.asset('lib/images/stark_label_white.png', scale: 10.0) : const SizedBox.shrink(),
+              starkDevices.contains(widget.device.remoteId) && flavor == 'stark' ? const SizedBox(height: 10,) : const SizedBox.shrink(),
               _buildTitle(context),
             ],
           ),

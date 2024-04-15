@@ -4,6 +4,7 @@ import 'package:compass/constants/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import '../constants/stark_devices.dart';
 import '../data/hive_implements.dart';
 import '../main.dart';
 
@@ -77,7 +78,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text('${widget.result.device.platformName}${techName.isEmpty ? '' : '\n($techName)'}', overflow: TextOverflow.clip, style: white16),
-          Text('MAC: ${widget.result.device.remoteId.str}', style: white12,)
+          // Text('MAC: ${widget.result.device.remoteId.str}', style: white12,)
         ],
       );
     } else {
@@ -117,7 +118,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
 
   @override
   Widget build(BuildContext context) {
-    var adv = widget.result.advertisementData;
+    // var adv = widget.result.advertisementData;
     return Column(
       children: [
         ListTile(
@@ -125,11 +126,16 @@ class _ScanResultTileState extends State<ScanResultTile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              starkDevices.contains(widget.result.device.remoteId) && flavor == 'stark' ? Image.asset('lib/images/stark_label_white.png', scale: 10.0) : const SizedBox.shrink(),
+              starkDevices.contains(widget.result.device.remoteId) && flavor == 'stark' ? const SizedBox(height: 10,) : const SizedBox.shrink(),
               _buildTitle(context),
-              if (adv.serviceUuids.isNotEmpty) _buildAdvRow(context, 'Service UUIDs:', getNiceServiceUuids(adv.serviceUuids)),
             ],
           ),
-          trailing: _buildConnectButton(context),
+          trailing: Column(
+            children: [
+              _buildConnectButton(context),
+            ],
+          ),
         ),
         const Padding(
           padding: EdgeInsets.only(left: 10, right: 10),

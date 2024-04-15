@@ -23,7 +23,7 @@ class FFF0Implements extends FFF0Repository{
   BluetoothCharacteristic? notifyChar;
   StreamSubscription<dynamic>? charSubscription;
   StreamController<Map<String, dynamic>>? streamController;
-  Map<String, dynamic> data = {};
+  Map<String, dynamic> data = {'errors': []};
 
   @override
   Future<void> connect(ScanResult r) async {
@@ -62,7 +62,7 @@ class FFF0Implements extends FFF0Repository{
           if (package.isNotEmpty){
             if (package[2] == 149 && data.isNotEmpty){
               streamController!.add(data);
-              data = {};
+              data = {'errors': []};
               decodePackage(package);
             } else {
               decodePackage(package);
@@ -190,7 +190,100 @@ class FFF0Implements extends FFF0Repository{
   
   @override
   void decodeError(List<int> package) {
-    
+    Uint8List input = Uint8List.fromList(package);
+    ByteData bd = input.buffer.asByteData();
+    for (int i = 4; i < 12; i++) {
+      int byte = bd.getUint8(i);
+      if (byte == 0) continue;
+
+      if (i != 11) { // Предполагаем, что Byte7 является 12-м байтом (индекс 11)
+        String bits = byte.toRadixString(2).padLeft(8, '0').split('').reversed.join();
+        for (int j = 0; j < bits.length; j++) {
+          if (bits[j] == '1' && i - 4 < errorDescriptions.length && j < errorDescriptions[i - 4].length) {
+            data['errors'].add(errorDescriptions[i - 4][j]);
+          }
+        }
+      }
+
+      if (bd.getUint8(11) == 0x03) {
+        data['errors'].add("Fault code: 3");
+      }
+
+      /*
+      String bits = byte.toRadixString(2).padLeft(8, '0').split('').reversed.join();
+      for (int j = 0; j < bits.length; j++) {
+        if (bits[j] == '1' && i - 4 < errorDescriptions.length && j < errorDescriptions[i - 4].length) {
+          data['errors'].add(errorDescriptions[i - 4][j]);
+        }
+      }
+      */
+    }
   }
 
 }
+
+
+final List<List<String>> errorDescriptions = [
+  [
+    "Одноступенчатое предупреждение о повышенном напряжении агрегата (One stage warning of unit over voltage)",
+    "Одноступенчатое предупреждение о повышенном напряжении агрегата (One stage warning of unit over voltage)",
+    "Одноступенчатое предупреждение о повышенном напряжении агрегата (One stage warning of unit over voltage)",
+    "Двухступенчатое предупреждение о повышенном напряжении агрегата (Two stage warning of unit over voltage)",
+    "Общее напряжение слишком высокое. Первичная тревога (Total voltage is too high One alarm)",
+    "Общее напряжение слишком высокое. Тревога второго уровня (Total voltage is too high Level two alarm)",
+    "Общее напряжение слишком низкое. Первичная тревога (Total voltage is too low One alarm)",
+    "Общее напряжение слишком низкое. Тревога второго уровня (Total voltage is too low Level two alarm)"
+  ],
+  [
+    "Слишком высокая температура зарядки. Первичная тревога (Charging temperature too high. One alarm)",
+    "Слишком высокая температура зарядки. Тревога второго уровня (Charging temperature too high. Level two alarm)",
+    "Слишком низкая температура зарядки. Первичная тревога (Charging temperature too low. One alarm)",
+    "Слишком низкая температура зарядки. Тревога второго уровня (Charging temperature's too low. Level two alarm)",
+    "Слишком высокая температура разрядки. Первичная тревога (Discharge temperature is too high. One alarm)",
+    "Слишком высокая температура разрядки. Тревога второго уровня (Discharge temperature is too high. Level two alarm)",
+    "Слишком низкая температура разрядки. Первичная тревога (Discharge temperature is too low. One alarm)",
+    "Слишком низкая температура разрядки. Тревога второго уровня (Discharge temperature is too low. Level two alarm)"
+  ],
+  [
+    "Заряд по току. Тревога первого уровня (Charge over current. Level one alarm)",
+    "Заряд по току. Тревога второго уровня (Charge over current, level two alarm)",
+    "Разряд по току. Тревога первого уровня (Discharge over current. Level one alarm)",
+    "Разряд по току. Тревога второго уровня (Discharge over current, level two alarm)",
+    "Уровень заряда батареи превышает допустимые пределы. Тревога первого уровня (SOC is too high an alarm)",
+    "Уровень заряда батареи превышает допустимые пределы. Тревога второго уровня (SOC is too high. Alarm Two)",
+    "Уровень заряда батареи меньше допустимого предела. Тревога первого уровня (SOC is too low. level one alarm)",
+    "Уровень заряда батареи меньше допустимого предела. Тревога второго уровня (SOC is too low. level two alarm)"
+  ],
+  [
+    "Перепад давления. Тревога первого уровня (Excessive differential pressure level one alarm)",
+    "Перепад давления. Тревога второго уровня (Excessive differential pressure level two alarm)",
+    "Высокий уровень перепада температур. Тревога первого уровня (Excessive temperature difference level one alarm)",
+    "Высокий уровень перепада температур. Тревога второго уровня (Excessive temperature difference level two alarm)"
+  ],
+  [
+    "Предупреждение о перегреве зарядного МОП-транзистора (Charging MOS overtemperature warning)"
+    "Предупреждение о перегреве разрядного МОП-транзистора (Discharge MOS overtemperature warning)",
+    "Отказ датчика определения температуры зарядного МОП-транзистора (Charging MOS temperature detection sensor failure)",
+    "Отказ датчика определения температуры разрядного МОП-транзистора (Discharge MOS temperature detection sensor failure)",
+    "Нарушение адгезии зарядного МОП-транзистора (Charging MOS adhesion failure)",
+    "Нарушение адгезии разрядного МОП-транзистора (Discharge MOS adhesion failure)",
+    "Отказ зарядного МОП-транзистора (Charging MOS breaker failure)",
+    "Отказ разрядного МОП-транзистора (Discharge MOS breaker failure)"
+  ],
+  [
+    "Неисправность чипа сбора данных AFE (AFE acquisition chip malfunction)",
+    "Потеря данных или сигнала от одной или нескольких ячеек (Monomer collect drop off)",
+    "Ошибка датчика температуры (Single Temperature Sensor Fault)",
+    "Ошибки хранения EEPROM (EEPROM storage failures)",
+    "Неисправность часов RTC (RTC clock malfunction)",
+    "Ошибка предварительной зарядки (Precharge Failure)",
+    "Неисправность автомобильной связи (Vehicle communications malfunction)",
+    "Неисправность модуля внутренней связи (Intranet communication module malfunction)"
+  ],
+  [
+    "Cбой текущего модуля (Current Module Failure)",
+    "Модуль определения основного давления (Main pressure detection module)",
+    "Отказ защиты от короткого замыкания (Short circuit protection failure)",
+    "Низкое напряжение, нет зарядки (Low Voltage No Charging)"
+  ]
+];

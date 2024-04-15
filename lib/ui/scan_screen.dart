@@ -190,7 +190,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         appBar: AppBar(
           backgroundColor: flavor == 'oem' ? const Color(0xFF42fff9) : const Color(0xFFf68800),
           centerTitle: true,
-          title: Text('BMS устройства', style: dark18,),
+          title: Text('доступные АКБ', style: dark18, overflow: TextOverflow.visible, textAlign: TextAlign.center,),
           actions: [
             _isScanning ? const Padding(
               padding: EdgeInsets.only(right: 25),

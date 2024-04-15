@@ -33,13 +33,13 @@ class SplashScreenState extends State<SplashScreen> {
           children: [
             Opacity(
               opacity: 0.7,
-              child: Image.asset('lib/images/logo.png', scale: 4)
+              child: Image.asset('lib/images/stark.png', scale: 4)
             ),
             const SizedBox(height: 10,),
             AnimatedTextKit(
               animatedTexts: [
                 TypewriterAnimatedText(
-                  'по заказу НПО Компас',
+                  'первая интелектуальная батарея',
                   textStyle: grey16,
                   speed: const Duration(milliseconds: 100),
                 ),

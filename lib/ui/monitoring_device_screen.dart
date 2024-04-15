@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:stroke_text/stroke_text.dart';
 
 import '../constants/stark_devices.dart';
 import '../data/hive_implements.dart';
@@ -42,6 +43,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
     );
     _iconTurns = Tween<double>(begin: 0.0, end: 0.5).animate(_controller);
     _heightFactor = _controller.drive(CurveTween(curve: Curves.easeInOut));
+
     initDeviceInfo();
   }
 
@@ -96,14 +98,16 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
   }
 
   Widget remainIndicator(int remain){
+    late Color remainColor;
     List<Color> colorsGradient = [
       Colors.red,
-      Colors.orange.shade900,
+      // Colors.orange.shade900,
       Colors.orange.shade800,
       Colors.orange,
       Colors.orange.shade300,
       Colors.yellow.shade600,
       Colors.yellow,
+      Colors.lightGreen.shade200,
       Colors.lightGreen.shade200,
       Colors.lightGreen.shade300,
       Colors.lightGreen.shade400,
@@ -111,13 +115,16 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
       Colors.lightGreen.shade600,
       Colors.lightGreen.shade700
     ];
+    if(remain <= 10) remainColor = Colors.red;
+    if(remain > 10 && remain <= 40) remainColor = Colors.yellow;
+    if(remain > 40 && remain <= 100) remainColor = Colors.green;
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 0),
       child: Row(
         children: [
           Flexible(
             child: Container(
-              height: 15, // Высота индикатора
+              height: 20, // Высота индикатора
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8), // Закругление краев
                 // color: Colors.grey[300], // Фон индикатора
@@ -162,7 +169,20 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
             )
           ),
           const SizedBox(width: 10),
-          Text('$remain%', style: grey16,),
+          /*
+          Text('$remain%', 
+            style: TextStyle(color: remainColor, fontSize: 18, fontWeight: FontWeight.w500),
+          ),
+          */
+          StrokeText(
+            text: "$remain%",
+            textStyle: TextStyle(
+              fontSize: 22,
+              color: remainColor
+            ),
+            strokeColor: Colors.black,
+            strokeWidth: 1,
+          )
         ],
       ),
     );
@@ -173,7 +193,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
     TextStyle style = value != null && unit == 'A' ? (value < 0 ? red18 : (value > 0 ? green18 : dark18)) : dark18;
 
     return Container(
-      height: 50,
+      height: 40,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         color: Colors.grey.shade200,
@@ -365,6 +385,23 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
     );
   }
 
+  Widget errors(List errors){
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, right: 8),
+      child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: errors.length,
+        itemBuilder: (context, index){
+          return ListTile(
+            leading: Icon(MdiIcons.alertCircle, color: Colors.red, size: 20),
+            title: Text('Ошибка: ${errors[index]}', style: dark14,),
+          );
+        }
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -414,13 +451,14 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                                       mainAxisSize: MainAxisSize.min,
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text('$deviceName ${nameController.text.isEmpty ? '' : '\n(${nameController.text})'}', style: dark16,),
-                                        Text('MAC: ${mac.toString()}', style: dark12,),
+                                        Text('$deviceName ${nameController.text.isEmpty ? '' : '\n(${nameController.text})'}', style: dark18,),
+                                        // Text('MAC: ${mac.toString()}', style: dark12,),
                                       ],
                                     ),
                                   ),
-                                  starkDevices.contains(mac) && flavor == 'stark' ? Image.asset('lib/images/stark.png', scale: 3.5) : const SizedBox.shrink(),
-                                  // Icon(MdiIcons.alertCircle, color: Colors.red),
+                                  starkDevices.contains(mac) && flavor == 'stark' ? Image.asset('lib/images/stark_label.png', scale: 9.0) : const SizedBox.shrink(),
+                                  data['errors'].isEmpty ? const SizedBox.shrink() : const SizedBox(width: 10,),
+                                  data['errors'].isEmpty ? const SizedBox.shrink() : Icon(MdiIcons.alertCircle, color: Colors.red, size: 30)
                                 ],
                               ),
                               Padding(
@@ -471,6 +509,21 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                           children: <Widget>[
                             const Divider(indent: 8, endIndent: 8, thickness: 1.0, height: 1.0,),
                             const SizedBox(height: 15,),
+                            data['errors'].isEmpty ? const SizedBox.shrink() : Padding(
+                              padding: const EdgeInsets.only(left: 8, right: 8),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.only(top: 2, bottom: 2),
+                                decoration: const BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                                  color: Colors.red,
+                                ),
+                                child: Center(child: Text('ошибки', style: white16,))
+                              ),
+                            ),
+                            data['errors'].isEmpty ? const SizedBox.shrink() : const SizedBox(height: 5,),
+                            data['errors'].isEmpty ? const SizedBox.shrink() : errors(data['errors']),
+                            data['errors'].isEmpty ? const SizedBox.shrink() : const SizedBox(height: 15,),
                             Padding(
                               padding: const EdgeInsets.only(left: 8, right: 8),
                               child: Container(
@@ -520,18 +573,15 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                             const SizedBox(height: 5,),
                             options(context),
                             const SizedBox(height: 15),
-                            Text('Testing', style: dark18,),
-                            const SizedBox(height: 15),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                foregroundColor: Colors.white,
+                            starkDevices.contains(mac) && flavor == 'stark' ? Container(
+                              height: 40,
+                              width: double.infinity,
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(8), bottomRight: Radius.circular(8)),
+                                color: Colors.orange,
                               ),
-                              onPressed: (){
-                                FFE0Implements().testData(widget.r);
-                              }, 
-                              child: Text('запросить', style: white14,)
-                            )
+                              child: Center(child: Text('произведено НПО Компас', style: dark15,)),
+                            ) : const SizedBox.shrink()
                           ],
                         ),
                       ),

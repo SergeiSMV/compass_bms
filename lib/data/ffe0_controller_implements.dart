@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:compass/utils/extra.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../constants/loger.dart';
@@ -74,6 +73,7 @@ class FFE0Implements extends FFE0Repository{
   @override
   Map<String, dynamic> decodePackage(List<int> package) {
     Map<String, dynamic> data = {};
+    data['errors'] = [];
     Uint8List input = Uint8List.fromList(package);
     ByteData bd = input.buffer.asByteData();
     try {
@@ -93,11 +93,32 @@ class FFE0Implements extends FFE0Repository{
       temp1 > 0 ? data['temp 1'] = '${temp1 ~/ 10} °C' : null;
       int temp2 = bd.getInt16(164, Endian.little);
       temp2 > 0 ? data['temp 2'] = '${temp2 ~/ 10} °C' : null;
+
+      // получаем ошибки
+      int rawErrorsBitmask = bd.getUint16(166, Endian.little);
+      if (rawErrorsBitmask.toRadixString(16) != '0'){
+        if (rawErrorsBitmask & 0x0001 != 0) data['errors'].add('Низкая мощность (Low capacity alarm (only warning))');
+        if (rawErrorsBitmask & 0x0002 != 0) data['errors'].add('Перегрев МОП-транзистора (MOS tube overtemperature alarm)');
+        if (rawErrorsBitmask & 0x0004 != 0) data['errors'].add('Высокое напряжене при зарядке (Charging overvoltage alarm)');
+        if (rawErrorsBitmask & 0x0008 != 0) data['errors'].add('Низкое напряжение разряда (Discharge undervoltage alarm)');
+        if (rawErrorsBitmask & 0x0010 != 0) data['errors'].add('Перегрев аккумулятора (Battery over temperature alarm)');
+        if (rawErrorsBitmask & 0x0020 != 0) data['errors'].add('Перегрузка по току заряда (Charging overcurrent alarm)');
+        if (rawErrorsBitmask & 0x0040 != 0) data['errors'].add('Перегрузка по току разряда (Discharge overcurrent alarm)');
+        if (rawErrorsBitmask & 0x0080 != 0) data['errors'].add('Перепад напряжения в ячейке (Cell differential pressure alarm)');
+        if (rawErrorsBitmask & 0x0100 != 0) data['errors'].add('Перегрев в батарейном отсеке (Overtemperature alarm in battery box)');
+        if (rawErrorsBitmask & 0x0200 != 0) data['errors'].add('Низкая температура аккумулятора (Battery low temperature alarm)');
+        if (rawErrorsBitmask & 0x0400 != 0) data['errors'].add('Высокое напряжение (Monomer overvoltage alarm)');
+        if (rawErrorsBitmask & 0x0800 != 0) data['errors'].add('Низкое напряжение (Monomer undervoltage alarm)');
+        if (rawErrorsBitmask & 0x1000 != 0) data['errors'].add('Защита 309_А (309_A protection)');
+        if (rawErrorsBitmask & 0x2000 != 0) data['errors'].add('Защита 309_В (309_B protection)');
+      }
     } catch (e) {
       null;
     }
     return data;
   }
+
+
   
 
   @override
