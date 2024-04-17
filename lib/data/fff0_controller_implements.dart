@@ -124,7 +124,7 @@ class FFF0Implements extends FFF0Repository{
   
   @override
   void decodeCellVoltage(List<int> package) {
-
+    log.d('package: $package');
     List<int> cellValues = [];
     List<List<int>> chunks = [];
     int chunkSize = 13;
@@ -140,7 +140,7 @@ class FFF0Implements extends FFF0Repository{
         ByteData bd = input.buffer.asByteData();
         for (int i = 0; i < 3; i++){
           try {
-            int volt = bd.getInt16(4 + 2 * i, Endian.little);
+            int volt = bd.getUint16(5 + 2 * i, Endian.big);
             cellValues.add(volt);
           } catch (e) {
             null;
