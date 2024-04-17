@@ -358,7 +358,7 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
               children: [
                 Icon(MdiIcons.fountainPenTip, color: Colors.white,),
                 const SizedBox(width: 5,),
-                Text('переименовать', style: white14,)
+                Text('название', style: white14,)
               ],
             )
           ),
