@@ -1,5 +1,4 @@
 import 'package:compass/constants/styles.dart';
-import 'package:compass/data/ffe0_controller_implements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -580,7 +579,24 @@ class _MonitoringDeviceScreenState extends ConsumerState<MonitoringDeviceScreen>
                                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(8), bottomRight: Radius.circular(8)),
                                 color: Colors.orange,
                               ),
-                              child: Center(child: Text('произведено НПО Компас', style: dark15,)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 0),
+                                    child: Text('произведено', style: dark(14, FontWeight.w400),),
+                                  ),
+                                  const SizedBox(width: 5,),
+                                  Image.asset('lib/images/compass_lbs.png', scale: 4.5),
+                                  const SizedBox(width: 5,),
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 0),
+                                    child: Text('НПО КОМПАС', style: dark(14, FontWeight.w600),),
+                                  )
+                                ],
+                              ),
+                              // child: Center(child: Text('произведено НПО "КОМПАС"', style: dark15,)),
+                              // Image.asset('lib/images/compas_lb.png', scale: 9.0)
                             ) : const SizedBox.shrink()
                           ],
                         ),

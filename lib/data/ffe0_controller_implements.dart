@@ -90,9 +90,9 @@ class FFE0Implements extends FFE0Repository{
       int remain = bd.getInt8(173);
       data['remain'] = remain;
       int temp1 = bd.getInt16(162, Endian.little);
-      temp1 > 0 ? data['temp 1'] = '${temp1 ~/ 10} °C' : null;
+      data['temp 1'] = '${temp1 ~/ 10} °C';
       int temp2 = bd.getInt16(164, Endian.little);
-      temp2 > 0 ? data['temp 2'] = '${temp2 ~/ 10} °C' : null;
+      data['temp 2'] = '${temp2 ~/ 10} °C';
 
       // получаем ошибки
       int rawErrorsBitmask = bd.getUint16(166, Endian.little);
@@ -122,6 +122,7 @@ class FFE0Implements extends FFE0Repository{
   
 
   @override
+  // ignore: override_on_non_overriding_member
   Future<void> testData(ScanResult r) async {
     
     List<BluetoothService> services = await r.device.discoverServices();
@@ -130,6 +131,7 @@ class FFE0Implements extends FFE0Repository{
 
     // List<int> hexRequest = [0x4E, 0x57, 0x00, 0x13, 0x00, 0x00, 0x00, 0x00, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x00, 0x00, 0x01, 0x29];
     // List<int> intRequest = [78, 87, 0, 19, 0, 0, 0, 0, 6, 3, 0, 0, 0, 0, 0, 0, 104, 0, 0, 1, 41];
+    // ignore: unused_local_variable
     List<int> hexRequest = [0x4E, 0x57, 0x00, 0x13, 0x00, 0x00, 0x00, 0x00, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x00, 0x00, 0x01, 0x29];
     List<int> intRequest = [78, 87, 0, 19, 0, 0, 0, 0, 6, 1, 0, 0, 0, 0, 0, 0, 104];
 

@@ -64,3 +64,11 @@ TextStyle orange16 = GoogleFonts.openSans(color: Colors.orange, fontSize: 16);
 TextStyle orange18 = GoogleFonts.openSans(color: Colors.orange, fontSize: 18);
 TextStyle orange20 = GoogleFonts.openSans(color: Colors.orange, fontSize: 20);
 TextStyle orange22 = GoogleFonts.openSans(color: Colors.orange, fontSize: 22);
+
+
+
+
+
+
+
+TextStyle dark(double size, [FontWeight fontWeight = FontWeight.normal]) => GoogleFonts.openSans(color: darkColor, fontSize: size, fontWeight: fontWeight);

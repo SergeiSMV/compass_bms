@@ -164,7 +164,8 @@ class FFF0Implements extends FFF0Repository{
     for (int i = 0; i < 7; i++){
       try {
         int temp = bd.getInt8(5 + 1 * i);
-        temp > 0 ? data['temp ${i + 1}'] = '${temp - 40} °C' : null;
+        data['temp ${i + 1}'] = '${temp - 40} °C';
+        // temp > 0 ? data['temp ${i + 1}'] = '${temp - 40} °C' : null;
       } catch (e) {
         null;
         break;

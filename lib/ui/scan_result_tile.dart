@@ -104,6 +104,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
   }
 
   
+  // ignore: unused_element
   Widget _buildAdvRow(BuildContext context, String title, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
