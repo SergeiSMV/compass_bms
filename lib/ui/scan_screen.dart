@@ -203,21 +203,21 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           ],
         ),
         body: Container(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          decoration: flavor == 'oem' ? const BoxDecoration(
-            image: DecorationImage(
-              opacity: 0.5,
-              image: AssetImage('lib/images/oem_bg.png'),
-              fit: BoxFit.cover,
-            ),
-          ) : const BoxDecoration(
-            image: DecorationImage(
-              opacity: 0.7,
-              image: AssetImage('lib/images/atom.png'),
-              fit: BoxFit.cover,
-            ),
-          ),
+          // height: MediaQuery.of(context).size.height,
+          // width: MediaQuery.of(context).size.width,
+          // decoration: flavor == 'oem' ? const BoxDecoration(
+          //   image: DecorationImage(
+          //     opacity: 0.5,
+          //     image: AssetImage('lib/images/oem_bg.png'),
+          //     fit: BoxFit.cover,
+          //   ),
+          // ) : const BoxDecoration(
+          //   image: DecorationImage(
+          //     opacity: 1,
+          //     image: AssetImage('lib/images/bonding.png'),
+          //     fit: BoxFit.cover,
+          //   ),
+          // ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -227,7 +227,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 80),
-                    child: Text('BMS устройства не найдены', style: grey16,),
+                    child: Text('BMS устройства не найдены', style: white16,),
                   )
                 )
               ) :

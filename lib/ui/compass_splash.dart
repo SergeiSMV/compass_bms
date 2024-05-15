@@ -18,7 +18,7 @@ class SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(
       const Duration(seconds: 4), () {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen())); // Замените NextScreen на ваш экран
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen()));
       }
     );
   }

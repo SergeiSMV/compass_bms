@@ -42,7 +42,7 @@ class _MonitoringScreenState extends ConsumerState<MonitoringScreen> {
               children: [
                 Icon(MdiIcons.clipboardSearchOutline, size: 50, color: flavor == 'oem' ? const Color(0xFF42fff9) : Colors.orange,),
                 const SizedBox(height: 10,),
-                Text('не выбрано\nни одного устройства,\nнечего мониторить', style: grey16, textAlign: TextAlign.center,),
+                Text('не выбрано\nни одного устройства', style: white16, textAlign: TextAlign.center,),
               ],
             ),
           ) : 

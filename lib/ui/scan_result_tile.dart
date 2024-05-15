@@ -122,20 +122,31 @@ class _ScanResultTileState extends State<ScanResultTile> {
     // var adv = widget.result.advertisementData;
     return Column(
       children: [
-        ListTile(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              starkDevices.contains(widget.result.device.remoteId) && flavor == 'stark' ? Image.asset('lib/images/stark_label_white.png', scale: 10.0) : const SizedBox.shrink(),
-              starkDevices.contains(widget.result.device.remoteId) && flavor == 'stark' ? const SizedBox(height: 10,) : const SizedBox.shrink(),
-              _buildTitle(context),
-            ],
-          ),
-          trailing: Column(
-            children: [
-              _buildConnectButton(context),
-            ],
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(5)
+            ),
+            
+            child: ListTile(
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  starkDevices.contains(widget.result.device.remoteId) && flavor == 'stark' ? Image.asset('lib/images/stark_label_white.png', scale: 10.0) : const SizedBox.shrink(),
+                  starkDevices.contains(widget.result.device.remoteId) && flavor == 'stark' ? const SizedBox(height: 10,) : const SizedBox.shrink(),
+                  _buildTitle(context),
+                ],
+              ),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildConnectButton(context),
+                ],
+              ),
+            ),
           ),
         ),
         const Padding(

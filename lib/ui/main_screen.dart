@@ -21,8 +21,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   Widget bottomNavBar(){
     return GNav(
+      backgroundColor: const Color(0xFF192f4c).withOpacity(0.7),
       textStyle: dark14,
-      tabMargin: const EdgeInsets.only(left: 20, right: 20, bottom: 8, top: 8),
+      tabMargin: const EdgeInsets.only(left: 20, right: 20, bottom: 10, top: 10),
       gap: 8,
       activeColor: Colors.black,
       iconSize: 25,
@@ -58,12 +59,29 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           final progress = ProgressHUD.of(context);
           return Scaffold(
             backgroundColor: Colors.black,
-            body: Consumer(
-              builder: (context, ref, child) {
-                final List<Widget> screens = [ScanScreen(progress: progress), const MonitoringScreen()];
-                final selectedIndex = ref.watch(screenIndexProvider);
-                return screens[selectedIndex];
-              }
+            body: Container(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              decoration: flavor == 'oem' ? const BoxDecoration(
+                image: DecorationImage(
+                  opacity: 0.5,
+                  image: AssetImage('lib/images/oem_bg.png'),
+                  fit: BoxFit.cover,
+                ),
+              ) : const BoxDecoration(
+                image: DecorationImage(
+                  opacity: 1,
+                  image: AssetImage('lib/images/bonding.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final List<Widget> screens = [ScanScreen(progress: progress), const MonitoringScreen()];
+                  final selectedIndex = ref.watch(screenIndexProvider);
+                  return screens[selectedIndex];
+                }
+              ),
             ),
             bottomNavigationBar: bottomNavBar(),
           );
