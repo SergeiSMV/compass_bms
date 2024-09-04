@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:compass/ui/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -9,6 +8,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'ui/bluetooth_off_screen.dart';
 import 'ui/compass_splash.dart';
+import 'ui/main_screen.dart';
 
 const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'default');
 
@@ -89,7 +89,7 @@ class BluetoothAdapterStateObserver extends NavigatorObserver {
 
   @override
   void didPop(Route route, Route? previousRoute) {
-    super.didPop(route, previousRoute);
+    super.didPop(route, previousRoute); 
     // Отменить подписку при открытии маршрута
     _adapterStateSubscription?.cancel();
     _adapterStateSubscription = null;

@@ -34,7 +34,7 @@ class BluetoothOffScreen extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20, right: 70, left: 70),
       child: ElevatedButton(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) => flavor == 'oem' ? const Color(0xFF42fff9) : const Color(0xFFf68800)),
+          backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) => flavor == 'oem' ? const Color(0xFF42fff9) : const Color(0xFFf68800)),
         ),
         onPressed: () async {
           try {

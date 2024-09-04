@@ -1,7 +1,8 @@
 
-import 'package:compass/constants/styles.dart';
-import 'package:compass/data/hive_implements.dart';
 import 'package:flutter/material.dart';
+
+import '../constants/styles.dart';
+import '../data/hive_implements.dart';
 
 
 Future renameDevice(BuildContext mainContext, TextEditingController controller, String mac){

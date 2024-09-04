@@ -1,4 +1,4 @@
-# compass
+# compass_bms_app
 
 A new Flutter project.
 

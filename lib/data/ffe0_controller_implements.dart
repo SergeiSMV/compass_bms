@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:compass/utils/extra.dart';
+import 'package:compass_bms_app/utils/extra.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../constants/loger.dart';

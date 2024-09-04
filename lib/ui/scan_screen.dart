@@ -138,9 +138,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            elevation: MaterialStateProperty.all<double>(2),
-            backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFb4b4b5)),
-            minimumSize: MaterialStateProperty.all<Size>(Size(MediaQuery.of(context).size.width, 45)),
+            elevation: WidgetStateProperty.all<double>(2),
+            backgroundColor: WidgetStateProperty.all<Color>(const Color(0xFFb4b4b5)),
+            minimumSize: WidgetStateProperty.all<Size>(Size(MediaQuery.of(context).size.width, 45)),
           ),
           onPressed: onStopPressed, 
           child: Text('остановить', style: white16)
@@ -151,9 +151,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            elevation: MaterialStateProperty.all<double>(2),
-            backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFf68800)),
-            minimumSize: MaterialStateProperty.all<Size>(Size(MediaQuery.of(context).size.width, 50)),
+            elevation: WidgetStateProperty.all<double>(2),
+            backgroundColor: WidgetStateProperty.all<Color>(const Color(0xFFf68800)),
+            minimumSize: WidgetStateProperty.all<Size>(Size(MediaQuery.of(context).size.width, 50)),
           ),
           onPressed: onScanPressed, 
           child: Text('поиск', style: dark16)
@@ -202,6 +202,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
             )
           ],
         ),
+        // ignore: avoid_unnecessary_containers
         body: Container(
           // height: MediaQuery.of(context).size.height,
           // width: MediaQuery.of(context).size.width,

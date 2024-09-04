@@ -1,4 +1,4 @@
-import 'package:compass/constants/styles.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +6,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:stroke_text/stroke_text.dart';
 
 import '../constants/stark_devices.dart';
+import '../constants/styles.dart';
 import '../data/hive_implements.dart';
 import '../main.dart';
 import '../providers/bms_provider.dart';

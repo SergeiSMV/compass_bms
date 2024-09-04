@@ -1,16 +1,16 @@
 import 'dart:async';
 
-import 'package:compass/constants/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../constants/stark_devices.dart';
+import '../constants/styles.dart';
 import '../data/hive_implements.dart';
 import '../main.dart';
 
 
 class ScanResultTile extends StatefulWidget {
-  const ScanResultTile({Key? key, required this.result, this.onTap}) : super(key: key);
+  const ScanResultTile({super.key, required this.result, this.onTap});
 
   final ScanResult result;
   final VoidCallback? onTap;

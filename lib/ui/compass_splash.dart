@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:compass/constants/styles.dart';
-import 'package:compass/ui/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+
+import '../constants/styles.dart';
+import 'main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

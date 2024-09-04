@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:compass/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../constants/stark_devices.dart';
 import '../constants/styles.dart';
 import '../data/hive_implements.dart';
+import '../main.dart';
 
 class SystemDeviceTile extends StatefulWidget {
   final BluetoothDevice device;
@@ -15,8 +15,8 @@ class SystemDeviceTile extends StatefulWidget {
   const SystemDeviceTile({
     required this.device,
     required this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<SystemDeviceTile> createState() => _SystemDeviceTileState();
