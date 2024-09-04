@@ -89,7 +89,7 @@ class BluetoothAdapterStateObserver extends NavigatorObserver {
 
   @override
   void didPop(Route route, Route? previousRoute) {
-    super.didPop(route, previousRoute);
+    super.didPop(route, previousRoute); 
     // Отменить подписку при открытии маршрута
     _adapterStateSubscription?.cancel();
     _adapterStateSubscription = null;
