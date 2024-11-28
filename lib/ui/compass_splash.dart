@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 
 import '../constants/styles.dart';
-import 'main_screen.dart';
+import 'main_scaffold/main_scaffold.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,7 +19,7 @@ class SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(
       const Duration(seconds: 4), () {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen()));
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainScaffold()));
       }
     );
   }
@@ -42,7 +42,7 @@ class SplashScreenState extends State<SplashScreen> {
                 TypewriterAnimatedText(
                   'первая интелектуальная батарея',
                   textStyle: grey16,
-                  speed: const Duration(milliseconds: 100),
+                  speed: const Duration(milliseconds: 90),
                 ),
               ],
               totalRepeatCount: 1,

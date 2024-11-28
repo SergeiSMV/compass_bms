@@ -8,21 +8,22 @@ import '../constants/styles.dart';
 import '../data/hive_implements.dart';
 import '../main.dart';
 
-class SystemDeviceTile extends StatefulWidget {
+class ConnectedDeviceTile extends StatefulWidget {
   final BluetoothDevice device;
   final VoidCallback onTap;
 
-  const SystemDeviceTile({
+  const ConnectedDeviceTile({
     required this.device,
     required this.onTap,
     super.key,
   });
 
   @override
-  State<SystemDeviceTile> createState() => _SystemDeviceTileState();
+  State<ConnectedDeviceTile> createState() => _ConnectedDeviceTileState();
 }
 
-class _SystemDeviceTileState extends State<SystemDeviceTile> {
+class _ConnectedDeviceTileState extends State<ConnectedDeviceTile> {
+
   BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
 
   late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
@@ -54,9 +55,12 @@ class _SystemDeviceTileState extends State<SystemDeviceTile> {
     }
   }
 
+  // NOT USED isConnected
+  /*
   bool get isConnected {
     return _connectionState == BluetoothConnectionState.connected;
   }
+  */
 
   Widget _buildTitle(BuildContext context) {
     if (widget.device.platformName.isNotEmpty) {
@@ -80,23 +84,32 @@ class _SystemDeviceTileState extends State<SystemDeviceTile> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ListTile(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              starkDevices.contains(widget.device.remoteId) && flavor == 'stark' ? Image.asset('lib/images/stark_label_white.png', scale: 10.0) : const SizedBox.shrink(),
-              starkDevices.contains(widget.device.remoteId) && flavor == 'stark' ? const SizedBox(height: 10,) : const SizedBox.shrink(),
-              _buildTitle(context),
-            ],
-          ),
-          trailing: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(5)
             ),
-            onPressed: widget.onTap,
-            child: Text('отключить', style: white14,),
+            child: ListTile(
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  starkDevices.contains(widget.device.remoteId) && flavor == 'stark' ? Image.asset('lib/images/stark_label_white.png', scale: 10.0) : const SizedBox.shrink(),
+                  starkDevices.contains(widget.device.remoteId) && flavor == 'stark' ? const SizedBox(height: 10,) : const SizedBox.shrink(),
+                  _buildTitle(context),
+                ],
+              ),
+              trailing: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: widget.onTap,
+                child: Text('отключить', style: white14,),
+              ),
+            ),
           ),
         ),
         const Padding(

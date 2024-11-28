@@ -8,12 +8,16 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'ui/bluetooth_off_screen.dart';
 import 'ui/compass_splash.dart';
-import 'ui/main_screen.dart';
+import 'ui/main_scaffold/main_scaffold.dart';
 
 const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'default');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Отключить отладочные сообщения FlutterBluePlus
+  await FlutterBluePlus.setLogLevel(LogLevel.none);
+
   await Hive.initFlutter();
   await Hive.openBox('hiveStorage');
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
@@ -56,8 +60,9 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     Widget screen = _adapterState == BluetoothAdapterState.on
-        ? flavor == 'oem' ? const MainScreen() : const SplashScreen()
+        ? flavor == 'oem' ? const MainScaffold() : const SplashScreen()
         : BluetoothOffScreen(adapterState: _adapterState);
+    // Widget screen = flavor == 'oem' ? const MainScaffold() : const SplashScreen();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       color: Colors.lightBlue,
@@ -67,9 +72,8 @@ class _AppState extends State<App> {
   }
 }
 
-//
+
 // Этот наблюдатель прослушивает Bluetooth Off и закрывает DeviceScreen.
-//
 class BluetoothAdapterStateObserver extends NavigatorObserver {
   StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
 
@@ -94,4 +98,8 @@ class BluetoothAdapterStateObserver extends NavigatorObserver {
     _adapterStateSubscription?.cancel();
     _adapterStateSubscription = null;
   }
+
+
+
+
 }

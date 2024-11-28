@@ -51,6 +51,8 @@ class _ScanResultTileState extends State<ScanResultTile> {
     }
   }
 
+  // NOT USED getNiceHexArray, getNiceManufacturerData, getNiceServiceData, getNiceServiceUuids
+  /*
   String getNiceHexArray(List<int> bytes) {
     return '[${bytes.map((i) => i.toRadixString(16).padLeft(2, '0')).join(', ')}]';
   }
@@ -66,6 +68,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
   String getNiceServiceUuids(List<Guid> serviceUuids) {
     return serviceUuids.join(', ').toUpperCase();
   }
+  */
 
   bool get isConnected {
     return _connectionState == BluetoothConnectionState.connected;
@@ -123,7 +126,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 5),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.3),

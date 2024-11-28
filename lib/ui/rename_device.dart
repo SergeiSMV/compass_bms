@@ -61,6 +61,7 @@ Future renameDevice(BuildContext mainContext, TextEditingController controller, 
                 foregroundColor: Colors.white,
               ),
               onPressed: () async {
+                // ignore: use_build_context_synchronously
                 await HiveImplements().saveDeviceName(controller.text, mac).then((value) => Navigator.pop(context));
               }, 
               child: Padding(

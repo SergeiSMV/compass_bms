@@ -9,7 +9,7 @@ import '../main.dart';
 import '../utils/snackbar.dart';
 
 class BluetoothOffScreen extends StatelessWidget {
-  const BluetoothOffScreen({Key? key, this.adapterState}) : super(key: key);
+  const BluetoothOffScreen({super.key, this.adapterState});
 
   final BluetoothAdapterState? adapterState;
 
