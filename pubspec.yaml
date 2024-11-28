@@ -45,6 +45,7 @@ dependencies:
   stroke_text: ^0.0.3
   logger: ^2.4.0
   google_fonts: ^6.2.1
+  win32: ^5.8.0
 
 dev_dependencies:
   flutter_test:
