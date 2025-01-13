@@ -1,3 +1,3 @@
 # Compass BMS
 
-<img src="https://disk.yandex.ru/i/dMFRlYKKxw1I7A" alt="" width="200"/>
+<img src="https://i.postimg.cc/g2vzqTgN/phone-1.png" alt="" width="200"/>
