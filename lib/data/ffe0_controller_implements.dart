@@ -22,8 +22,10 @@ class FFE0Implements extends FFE0Repository{
   Future<void> connect(ScanResult r) async {
     await r.device.connectAndUpdateStream().then((_) async {
       List<BluetoothService> services = await r.device.discoverServices();
+      // log.i(services);
       var service = services.firstWhere((s) => s.uuid == targetService);
       var char = service.characteristics.firstWhere((c) => c.uuid == targetChar);
+      log.i(char);
       await char.write(deviceInfo, withoutResponse: false);
       await Future.delayed(const Duration(milliseconds: 1000));
       await char.write(cellInfo, withoutResponse: false);
@@ -64,6 +66,7 @@ class FFE0Implements extends FFE0Repository{
         });
       });
     } catch (e) {
+      log.e('streamData');
       streamController!.close();
       null;
     }
