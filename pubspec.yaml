@@ -35,7 +35,8 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  flutter_blue_plus: ^1.32.12
+  flutter_blue_plus: ^1.32.12 # OLD
+  flutter_reactive_ble: ^5.4.0 # NEW
   flutter_riverpod: ^2.5.1
   hive_flutter: ^1.1.0
   animated_text_kit: ^4.2.2
@@ -46,6 +47,9 @@ dependencies:
   logger: ^2.4.0
   google_fonts: ^6.2.1
   win32: ^5.8.0
+  permission_handler: ^11.3.1
+  simple_ripple_animation: ^0.1.0
+  
 
 dev_dependencies:
   flutter_test:

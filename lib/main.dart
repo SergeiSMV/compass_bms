@@ -1,105 +1,41 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'ui/bluetooth_off_screen.dart';
-import 'ui/compass_splash.dart';
-import 'ui/main_scaffold/main_scaffold.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'default');
+// ignore: unused_import
+import '_old/old_main_app.dart';
+import 'ui/global_widgets/main_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await requestPermissions();
 
-  // Отключить отладочные сообщения FlutterBluePlus
-  await FlutterBluePlus.setLogLevel(LogLevel.none);
 
   await Hive.initFlutter();
   await Hive.openBox('hiveStorage');
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
-    runApp(const ProviderScope(child: App()));
+    runApp(
+      const ProviderScope(
+        child: 
+          // App() // old_version
+          MainApp() // new version
+      )
+    );
   });
 }
 
-
-class App extends StatefulWidget {
-  const App({super.key});
-
-  @override
-  State<App> createState() => _AppState();
-}
-
-class _AppState extends State<App> {
-  
-  BluetoothAdapterState _adapterState = BluetoothAdapterState.unknown;
-  late StreamSubscription<BluetoothAdapterState> _adapterStateStateSubscription;
-
-
-  @override
-  void initState() {
-    super.initState();
-    _adapterStateStateSubscription = FlutterBluePlus.adapterState.listen((state) {
-      _adapterState = state;
-      if (mounted) {
-        setState(() {});
-      }
-    });
+Future<void> requestPermissions() async {
+  if (await Permission.bluetoothScan.isDenied) {
+    await Permission.bluetoothScan.request();
   }
-
-  @override
-  void dispose() {
-    _adapterStateStateSubscription.cancel();
-    super.dispose();
+  if (await Permission.bluetoothConnect.isDenied) {
+    await Permission.bluetoothConnect.request();
   }
-
-
-  @override
-  Widget build(BuildContext context) {
-    Widget screen = _adapterState == BluetoothAdapterState.on
-        ? flavor == 'oem' ? const MainScaffold() : const SplashScreen()
-        : BluetoothOffScreen(adapterState: _adapterState);
-    // Widget screen = flavor == 'oem' ? const MainScaffold() : const SplashScreen();
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      color: Colors.lightBlue,
-      home: screen,
-      // navigatorObservers: [BluetoothAdapterStateObserver()],
-    );
+  if (await Permission.location.isDenied) {
+    await Permission.location.request();
   }
-}
-
-
-// Этот наблюдатель прослушивает Bluetooth Off и закрывает DeviceScreen.
-class BluetoothAdapterStateObserver extends NavigatorObserver {
-  StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
-
-  @override
-  void didPush(Route route, Route? previousRoute) {
-    super.didPush(route, previousRoute);
-    if (route.settings.name == '/DeviceScreen') {
-      // Начните прослушивать изменения состояния Bluetooth при нажатии нового маршрута.
-      _adapterStateSubscription ??= FlutterBluePlus.adapterState.listen((state) {
-        if (state != BluetoothAdapterState.on) {
-          // Вспомнить текущий маршрут, если Bluetooth выключен
-          navigator?.pop();
-        }
-      });
-    }
-  }
-
-  @override
-  void didPop(Route route, Route? previousRoute) {
-    super.didPop(route, previousRoute); 
-    // Отменить подписку при открытии маршрута
-    _adapterStateSubscription?.cancel();
-    _adapterStateSubscription = null;
-  }
-
-
-
-
 }
