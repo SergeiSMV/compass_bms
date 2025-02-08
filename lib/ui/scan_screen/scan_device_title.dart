@@ -12,6 +12,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import '../../data/ble_repository/ble_implementation.dart';
 import '../../models/device_state_model.dart';
 import '../../riverpod/riverpod.dart';
+import '../../static/logger.dart';
 import '../../static/stark_devices.dart';
 
 

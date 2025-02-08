@@ -84,9 +84,11 @@ class FFE0Implements extends FFE0Repository{
     Uint8List input = Uint8List.fromList(package);
     ByteData bd = input.buffer.asByteData();
     try {
-      for (int i = 0; i < 32; i++){
-        int result = bd.getInt16(6 + 2 * i, Endian.little);
-        result > 0 ? data['cell ${i + 1}'] = result / 1000 : null;
+      for (int i = 0; i < 32; i++) {
+        final int result = bd.getInt16(6 + 2 * i, Endian.little);
+        if (result > 0) {
+          data['cell ${i + 1}'] = result / 1000;
+        }
       }
       int voltage = bd.getInt32(150, Endian.little);
       data['voltage'] = voltage / 1000;

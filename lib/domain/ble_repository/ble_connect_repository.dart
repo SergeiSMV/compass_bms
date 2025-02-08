@@ -1,3 +1,4 @@
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 abstract class BleConnectRepository {
@@ -6,6 +7,8 @@ abstract class BleConnectRepository {
 
   Future<bool> isDeviceAvailable(WidgetRef ref, String deviceId);
 
-  Future<void> getDeviceServices(WidgetRef ref, String deviceId);
+  Future<void> charStreamData(FlutterReactiveBle ble);
+
+  Future<void> disposeStreamDependencies();
 
 }

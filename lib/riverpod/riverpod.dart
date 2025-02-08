@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/ble_repository/ffe0_service_implementation.dart';
 import '../models/device_state_model.dart';
 import '../static/app_bar_titles.dart';
+import '../static/logger.dart';
 
 // Провайдер экземпляра FlutterReactiveBle
 final bleProvider = Provider<FlutterReactiveBle>((ref) => FlutterReactiveBle());
@@ -108,8 +110,8 @@ class ConnectedDevicesDevicesNotifier extends StateNotifier<List<DiscoveredDevic
 }
 
 
-// провайдер состояния подключения
-final deviceStateProvider = StateNotifierProvider.family.autoDispose<DeviceStateNotifier, DeviceStateModel, String>(
+// провайдер состояния подключения подключенных bluetooth устройств
+final deviceStateProvider = StateNotifierProvider.family<DeviceStateNotifier, DeviceStateModel, String>(
   (ref, deviceId) => DeviceStateNotifier(deviceId),
 );
 
@@ -126,52 +128,6 @@ class DeviceStateNotifier extends StateNotifier<DeviceStateModel> {
   }
 
 }
-
-/*
-// обновленный список устройств
-final devicesStateProvider = StateNotifierProvider<DevicesStateNotifier, List<DeviceStateModel>>((ref) {
-  return DevicesStateNotifier();
-});
-
-class DevicesStateNotifier extends StateNotifier<List<DeviceStateModel>> {
-  DevicesStateNotifier() : super([]);
-
-  void addDevice(DiscoveredDevice device) {
-    if (!state.any((d) => d.deviceId == device.id)) {
-      state = [
-        ...state,
-        DeviceStateModel(
-          deviceId: device.id,
-          device: device,
-        ),
-      ];
-    }
-  }
-
-  void updateDevice(String deviceId, {bool? isConnected, bool? loading, StreamSubscription<ConnectionStateUpdate>? subscription}) {
-    state = state.map((device) {
-      if (device.deviceId == deviceId) {
-        return device.copyWith(
-          isConnected: isConnected ?? device.isConnected,
-          loading: loading ?? device.loading,
-          subscription: subscription ?? device.subscription,
-        );
-      }
-      return device;
-    }).toList();
-  }
-
-  void removeDevice(String deviceId) {
-    state = state.where((device) => device.deviceId != deviceId).toList();
-  }
-
-  void clearDevices() {
-    state = [];
-  }
-}
-*/
-
-
 
 
 // провайдер сообщений
@@ -190,4 +146,28 @@ class MessageNotifier extends StateNotifier<String> {
     });
   }
 }
+
+
+// трансляция показаний BMS устройства
+final bmsDataStreamProvider = StreamProvider.family.autoDispose<Map<String, dynamic>, String>(
+  (ref, deviceID) async* {
+    dynamic implementsClass;
+    final ble = ref.read(bleProvider);
+    final services = await ble.getDiscoveredServices(deviceID);
+
+    for(var service in services){
+      if(service.id.toString() == '0000ffe0-0000-1000-8000-00805f9b34fb'){
+        log.i('запуск stream для ffe0');
+        implementsClass = FFE0ServiceImplementation(ble: ble, deviceID: deviceID);
+      }
+      if(service.id.toString() == '0000fff0-0000-1000-8000-00805f9b34fb'){
+        null;
+      }
+    }
+    ref.onDispose(() {
+      implementsClass.disposeStreamDependencies();
+    });
+    yield* await implementsClass.ffe0Stream();
+  }
+);
 

@@ -74,7 +74,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         itemBuilder: (context, index){
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 3),
-            child: ScanDeviceTitle(device: devices[index], key: UniqueKey(),),
+            child: ScanDeviceTitle(device: devices[index]),
           );
         }
       ),

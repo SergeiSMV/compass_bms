@@ -4,9 +4,11 @@ import 'package:compass_bms_app/domain/ble_repository/ble_repository.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../models/device_state_model.dart';
 import '../../riverpod/riverpod.dart';
 import '../../static/bms_uuids.dart';
 import '../../static/logger.dart';
+import 'ble_connect_implementation.dart';
 
 class BleImplementation extends BleRepository {
 
@@ -95,13 +97,13 @@ class BleImplementation extends BleRepository {
     final ble = ref.read(bleProvider);
     // Отменяем предыдущую подписку, если она существует
     await connectionStateSubscription?.cancel();
+
     await Future.delayed(const Duration(milliseconds: 300));
     connectionStateSubscription = ble.connectedDeviceStream.listen(
       (device){
         switch (device.connectionState) {
           case DeviceConnectionState.connecting:
             ref.read(deviceStateProvider(device.deviceId).notifier).updateConnectionStatus(
-              isConnected: false, 
               loading: true
             );
             break;
@@ -115,6 +117,8 @@ class BleImplementation extends BleRepository {
           case DeviceConnectionState.disconnecting:
             break;
           case DeviceConnectionState.disconnected:
+            final DeviceStateModel deviceStateModel = ref.read(deviceStateProvider(device.deviceId));
+            BleConnectImplementation(device: deviceStateModel.device!).disposeStreamDependencies();
             ref.read(deviceStateProvider(device.deviceId).notifier).updateConnectionStatus(
               isConnected: false,
               loading: false,
